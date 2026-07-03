@@ -19,12 +19,20 @@ const nvidiaClient = new OpenAI({
   timeout: 60 * 1000,
   maxRetries: 2,
 });
-const gpt55Client = new OpenAI({
+// GPT-5.5 qua highwayapi.ai (jiekou.ai) — HỖ TRỢ NHIỀU KEY, tự xoay vòng khi 1 key hết
+// quota/bị rate-limit (giống serpApiManager). Gộp HIGHWAY_API_KEYS (số nhiều, phân cách phẩy)
+// + HIGHWAY_API_KEY (số ít, tương thích cũ), khử trùng giữ thứ tự. Mỗi key → 1 client riêng.
+const HIGHWAY_KEYS = [...new Set(
+  [...(process.env.HIGHWAY_API_KEYS || '').split(','), process.env.HIGHWAY_API_KEY || '']
+    .map(k => k.trim()).filter(Boolean)
+)];
+const gpt55Clients = HIGHWAY_KEYS.map(apiKey => new OpenAI({
   baseURL: 'https://api.highwayapi.ai/openai/v1',
-  apiKey: process.env.HIGHWAY_API_KEY,
+  apiKey,
   timeout: 45 * 1000,
   maxRetries: 0,
-});
+}));
+if (gpt55Clients.length) console.log(`✅ Đã load ${gpt55Clients.length} highway (GPT-5.5) key`);
 const OPENCODE_MODEL = 'mimo-v2.5-free';
 const NVIDIA_MODEL_PRIMARY = 'stepfun-ai/step-3.7-flash';
 const NVIDIA_MODEL_FALLBACK = 'minimaxai/minimax-m2.7';
@@ -53,6 +61,45 @@ function withModel(baseParams, model) {
   const params = { ...baseParams, model };
   if (REASONING_MODELS.has(model)) params.reasoning_effort = 'low';
   return params;
+}
+
+// Lỗi thuộc về RIÊNG 1 key (hết quota / sai key / bị rate-limit) → nên đổi key khác.
+// Phân biệt với lỗi hạ tầng (network/timeout/500): loại đó đổi key vô ích + tốn thêm 45s
+// timeout mỗi key → ném thẳng để fallback nhanh sang NVIDIA.
+function isHighwayKeyError(err) {
+  const status = err?.status || err?.response?.status;
+  if ([401, 402, 403, 429].includes(status)) return true;
+  const msg = (err?.message || '').toLowerCase();
+  return /quota|insufficient|exceeded|rate.?limit|too many|balance|credit|余额|额度/.test(msg);
+}
+
+// Con trỏ key đang dùng — nhớ qua các request để KHÔNG thử lại key đã cạn mỗi lần gọi
+// (giống serpApiManager). Khi 1 key hết quota, con trỏ dính luôn sang key sống kế tiếp.
+let gpt55Cursor = 0;
+
+// Gọi GPT-5.5 (highway) với xoay vòng key: bắt đầu từ key đang dùng, gặp lỗi HẾT QUOTA/CHẶN
+// thì sang key kế (vòng tròn); hết sạch key (hoặc gặp lỗi hạ tầng) → ném để caller fallback
+// sang NVIDIA. Dùng chung cho cả stream (trả về stream object) lẫn non-stream (trả về response).
+async function gpt55Create(params) {
+  const n = gpt55Clients.length;
+  if (!n) throw new Error('Chưa cấu hình HIGHWAY_API_KEY(S)');
+  let lastErr;
+  for (let attempt = 0; attempt < n; attempt++) {
+    const idx = (gpt55Cursor + attempt) % n;
+    try {
+      const res = await gpt55Clients[idx].chat.completions.create(params);
+      gpt55Cursor = idx; // key này chạy được → các request sau bắt đầu thẳng từ đây
+      return res;
+    } catch (err) {
+      lastErr = err;
+      if (isHighwayKeyError(err) && attempt < n - 1) {
+        console.warn(`🔄 Highway key ${idx + 1}/${n} hết quota/bị chặn (${err.message}) → đổi key khác`);
+        continue;
+      }
+      throw err; // lỗi hạ tầng, hoặc đã thử hết key → để provider-fallback lo tiếp
+    }
+  }
+  throw lastErr;
 }
 
 const SYSTEM_PROMPT = `Bạn là TravelAI - trợ lý du lịch thông minh của Việt Nam.
@@ -1282,8 +1329,8 @@ TUYỆT ĐỐI không lặp lại câu trả lời ở lượt trước.`;
     if (preferredProvider === 'gpt55') {
       // Primary: GPT-5.5 (highwayapi.ai) → fallback: nvidia step3.7 → nvidia minimax
       try {
-        client = gpt55Client; model = GPT55_MODEL; provider = 'gpt55';
-        const stream = await client.chat.completions.create(withModel(params, model));
+        model = GPT55_MODEL; provider = 'gpt55';
+        const stream = await gpt55Create(withModel(params, model));
         console.log(`[AI-PERF] ${provider} (${model}) stream open: ${Date.now() - t0}ms`);
         return await this._consumeStream(stream, onChunk, t0);
       } catch (err) {
@@ -1382,7 +1429,7 @@ TUYỆT ĐỐI không lặp lại câu trả lời ở lượt trước.`;
     if (preferredProvider === 'gpt55') {
       // Primary: GPT-5.5 → fallback: nvidia step3.7 → nvidia minimax
       try {
-        const res = await gpt55Client.chat.completions.create(withModel(params, GPT55_MODEL));
+        const res = await gpt55Create(withModel(params, GPT55_MODEL));
         return res.choices[0]?.message?.content || 'Không có phản hồi';
       } catch (err) {
         console.warn(`[AI] ${GPT55_MODEL} failed (${err.message}), falling back to nvidia step3.7`);
@@ -1583,7 +1630,7 @@ Tạo 2-3 review mẫu chân thực.`;
       const preferredProvider = process.env.AI_PROVIDER || 'nvidia';
       if (preferredProvider === 'gpt55') {
         try {
-          const res = await gpt55Client.chat.completions.create(withModel(params, GPT55_MODEL));
+          const res = await gpt55Create(withModel(params, GPT55_MODEL));
           return res.choices[0]?.message?.content;
         } catch (err) {
           console.warn(`[generateTour] ${GPT55_MODEL} failed (${err.message}), thử nvidia step3.7`);
