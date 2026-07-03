@@ -1,0 +1,1741 @@
+{
+  "hotels": [
+    {
+      "name": "Dong Nam A2",
+      "lat": 10.2582352,
+      "lon": 106.3622189,
+      "tags": {
+        "name": "Dong Nam A2",
+        "tourism": "hotel"
+      }
+    },
+    {
+      "name": "Khách sạn Hùng Vương",
+      "lat": 10.2345808,
+      "lon": 106.3741617,
+      "tags": {
+        "addr:city": "Bến Tre",
+        "addr:district": "TP. Bến Tre",
+        "addr:housenumber": "166",
+        "addr:province": "Bến Tre",
+        "addr:street": "Hung Vuong",
+        "addr:subdistrict": "Phường An Hội",
+        "internet_access": "wlan",
+        "internet_access:fee": "no",
+        "name": "Khách sạn Hùng Vương",
+        "payment:cash": "yes",
+        "phone": "+84753826134",
+        "smoking": "yes",
+        "tourism": "hotel",
+        "wheelchair": "yes"
+      }
+    },
+    {
+      "name": "Ben Tre Kiwi Oasis",
+      "lat": 10.2295492,
+      "lon": 106.3654683,
+      "tags": {
+        "name": "Ben Tre Kiwi Oasis",
+        "tourism": "hotel",
+        "website": "https://www.bentrehoteloasis.com/"
+      }
+    },
+    {
+      "name": "Ham Luong Tourist Hotel",
+      "lat": 10.233891,
+      "lon": 106.3689133,
+      "tags": {
+        "name": "Ham Luong Tourist Hotel",
+        "name:de": "Ham Luong Tourist Hotel",
+        "tourism": "hotel"
+      }
+    },
+    {
+      "name": "Khách sạn Sao Mai*",
+      "lat": 10.2371068,
+      "lon": 106.3556597,
+      "tags": {
+        "internet_access": "wlan",
+        "name": "Khách sạn Sao Mai*",
+        "opening_hours": "24/7",
+        "tourism": "hotel"
+      }
+    },
+    {
+      "name": "Ba Danh Homestay",
+      "lat": 10.2216138,
+      "lon": 106.3967008,
+      "tags": {
+        "email": "badanhhomestay@gmail.com",
+        "internet_access": "yes",
+        "internet_access:fee": "no",
+        "name": "Ba Danh Homestay",
+        "operator": "Nguyen Phu Si",
+        "phone": "0989217902",
+        "tourism": "guest_house"
+      }
+    },
+    {
+      "name": "Không có tên",
+      "lat": 10.2360666,
+      "lon": 106.3890889,
+      "tags": {
+        "tourism": "hotel"
+      }
+    },
+    {
+      "name": "Trạm dừng nghỉ",
+      "lat": 10.30657,
+      "lon": 106.3498817,
+      "tags": {
+        "name": "Trạm dừng nghỉ",
+        "name:vi": "Trạm dừng nghỉ",
+        "tourism": "guest_house"
+      }
+    },
+    {
+      "name": "Thói Hòa Homestay",
+      "lat": 10.328342,
+      "lon": 106.31828,
+      "tags": {
+        "addr:housenumber": "254",
+        "addr:street": "Thói Hòa",
+        "email": "hai_den@yahoo.com",
+        "internet_access": "wlan",
+        "name": "Thói Hòa Homestay",
+        "opening_hours": "Mo-Su 08:00-18:00",
+        "phone": "0913615759",
+        "tourism": "guest_house"
+      }
+    },
+    {
+      "name": "Không có tên",
+      "lat": 10.2626094,
+      "lon": 106.3613981,
+      "tags": {
+        "tourism": "guest_house"
+      }
+    },
+    {
+      "name": "Nha chi tu",
+      "lat": 10.3091684,
+      "lon": 106.3638991,
+      "tags": {
+        "name": "Nha chi tu",
+        "name:vi": "Nha chi tu",
+        "tourism": "guest_house"
+      }
+    },
+    {
+      "name": "Không có tên",
+      "lat": 10.3240981,
+      "lon": 106.3684543,
+      "tags": {
+        "internet_access": "wlan",
+        "name:en": "Homestay",
+        "operator": "Trung",
+        "phone": "0908607853",
+        "tourism": "guest_house"
+      }
+    },
+    {
+      "name": "Không có tên",
+      "lat": 10.2066205,
+      "lon": 106.3381406,
+      "tags": {
+        "internet_access": "wlan",
+        "name:en": "mai’s house Homestay",
+        "tourism": "guest_house"
+      }
+    },
+    {
+      "name": "Nhon Thanh Homestay",
+      "lat": 10.2069134,
+      "lon": 106.3926315,
+      "tags": {
+        "name": "Nhon Thanh Homestay",
+        "tourism": "guest_house"
+      }
+    },
+    {
+      "name": "Hua Doc",
+      "lat": 10.2178202,
+      "lon": 106.3967426,
+      "tags": {
+        "name": "Hua Doc",
+        "tourism": "guest_house"
+      }
+    },
+    {
+      "name": "Mekong Home",
+      "lat": 10.157376,
+      "lon": 106.3892856,
+      "tags": {
+        "addr:street": "Mekong Home, village de Phuoc Long, commune de Ninh Hai, district de Giong Trom, province de Ben Tre, Vietnam",
+        "name": "Mekong Home",
+        "phone": "+(84) 987 29 97 18",
+        "tourism": "hotel",
+        "website": "http://www.mekonghome.com"
+      }
+    },
+    {
+      "name": "Nhà Phân Phối Khuê Hưng",
+      "lat": 10.2700578,
+      "lon": 106.3245021,
+      "tags": {
+        "name": "Nhà Phân Phối Khuê Hưng",
+        "tourism": "guest_house"
+      }
+    },
+    {
+      "name": "Ben Tre Farm Stay (Bungalows)",
+      "lat": 10.2160983,
+      "lon": 106.3740692,
+      "tags": {
+        "description": "Bungalows",
+        "name": "Ben Tre Farm Stay (Bungalows)",
+        "tourism": "guest_house"
+      }
+    },
+    {
+      "name": "Green Homestay Bến Tre",
+      "lat": 10.2180439,
+      "lon": 106.3755552,
+      "tags": {
+        "addr:city": "Bến Tre",
+        "addr:district": "Bến Tre",
+        "addr:housenumber": "324C",
+        "addr:province": "Bến Tre",
+        "addr:street": "ấp 3",
+        "addr:subdistrict": "Phú Nhuận",
+        "name": "Green Homestay Bến Tre",
+        "tourism": "guest_house",
+        "website": "https://greenhomestaybentre.com/"
+      }
+    },
+    {
+      "name": "Nam Binh  (correct)",
+      "lat": 10.1823452,
+      "lon": 106.3707883,
+      "tags": {
+        "name": "Nam Binh  (correct)",
+        "tourism": "hotel"
+      }
+    },
+    {
+      "name": "Không có tên",
+      "lat": 10.2412094,
+      "lon": 106.3965394,
+      "tags": {
+        "name:en": "Mecong Homestay",
+        "tourism": "guest_house"
+      }
+    },
+    {
+      "name": "Không có tên",
+      "lat": 10.182976,
+      "lon": 106.3707335,
+      "tags": {
+        "name:en": "Nam Binh Homestay (correct location)",
+        "tourism": "guest_house"
+      }
+    },
+    {
+      "name": "Mango Home Riverside",
+      "lat": 10.2253173,
+      "lon": 106.4158004,
+      "tags": {
+        "name": "Mango Home Riverside",
+        "tourism": "hotel"
+      }
+    },
+    {
+      "name": "Ben Tre Stay",
+      "lat": 10.2464751,
+      "lon": 106.3935692,
+      "tags": {
+        "addr": "665D Lo Thay Cai, Ben Tre, Vietnam",
+        "name": "Ben Tre Stay",
+        "tourism": "guest_house"
+      }
+    },
+    {
+      "name": "Coco Island",
+      "lat": 10.3361825,
+      "lon": 106.3698353,
+      "tags": {
+        "addr:city": "Bến Tre",
+        "addr:district": "Châu Thành",
+        "addr:housenumber": "ấp 10",
+        "addr:province": "Bến Tre",
+        "addr:street": "Ấp Tân Vinh",
+        "addr:subdistrict": "Tân Thạch",
+        "brand": "Coco Island",
+        "email": "festppuuhosting@cocoisland.vn",
+        "image": "https://cocoisland.vn/wp-content/uploads/2021/06/coco-island-con-phung-ben-tre2-510x510.jpg",
+        "internet_access": "wlan",
+        "internet_access:fee": "no",
+        "name": "Coco Island",
+        "operator": "Công ty TNHH Dl DV TM Cồn Phụng",
+        "phone": "+84939645179",
+        "rooms": "30",
+        "tourism": "hotel",
+        "website": "https://cocoisland.vn/"
+      }
+    },
+    {
+      "name": "Khách sạn Nhựt Nguyệt",
+      "lat": 10.3492295,
+      "lon": 106.3401895,
+      "tags": {
+        "addr:street": "Lê Thị Hồng Gấm",
+        "name": "Khách sạn Nhựt Nguyệt",
+        "tourism": "hotel"
+      }
+    },
+    {
+      "name": "Không có tên",
+      "lat": 10.2203398,
+      "lon": 106.3827878,
+      "tags": {
+        "internet_access": "wlan",
+        "name:en": "Hide Away Ben Tre",
+        "phone": "+84944903301",
+        "tourism": "guest_house"
+      }
+    },
+    {
+      "name": "Diamond Star Hotel",
+      "lat": 10.2345808,
+      "lon": 106.3755082,
+      "tags": {
+        "addr:city": "Bến Tre",
+        "addr:district": "TP. Bến Tre",
+        "addr:housenumber": "140",
+        "addr:province": "Bến Tre",
+        "addr:street": "Hùng Vương",
+        "addr:subdistrict": "Phường An Hội",
+        "contact:facebook": "Diamond-Stars-Ben-Tre-108251257244227",
+        "contact:instagram": "diamondstarsbentrehotel7",
+        "contact:twitter": "DIAMONDSTARSBE1",
+        "email": "info@diamondstarbentre.com",
+        "internet_access": "wlan",
+        "name": "Diamond Star Hotel",
+        "name:en": "Diamond Stars Ben Tre Hotel",
+        "opening_hours": "24/7",
+        "phone": "+84 275 3748 888",
+        "tourism": "hotel",
+        "website": "https://diamondstarbentre.com/"
+      }
+    },
+    {
+      "name": "Bentre Coco Lodge",
+      "lat": 10.2375405,
+      "lon": 106.3183155,
+      "tags": {
+        "contact:facebook": "@bentrecocolodge",
+        "internet_access": "wlan",
+        "name": "Bentre Coco Lodge",
+        "phone": "0983 775 572",
+        "tourism": "guest_house"
+      }
+    }
+  ],
+  "restaurants": [
+    {
+      "name": "Sea Food Restaurant",
+      "lat": 10.2565634,
+      "lon": 106.3660026,
+      "tags": {
+        "amenity": "restaurant",
+        "name": "Sea Food Restaurant"
+      }
+    },
+    {
+      "name": "Hủ tiếu pate",
+      "lat": 10.2430841,
+      "lon": 106.3750143,
+      "tags": {
+        "amenity": "restaurant",
+        "cuisine": "vietnamese",
+        "name": "Hủ tiếu pate"
+      }
+    },
+    {
+      "name": "Bà Chè",
+      "lat": 10.2384122,
+      "lon": 106.379322,
+      "tags": {
+        "amenity": "cafe",
+        "cuisine": "vietnamese",
+        "name": "Bà Chè"
+      }
+    },
+    {
+      "name": "Bánh mì - bún bò Huế Hồng Thu",
+      "lat": 10.2360709,
+      "lon": 106.3783939,
+      "tags": {
+        "amenity": "restaurant",
+        "cuisine": "vietnamese",
+        "name": "Bánh mì - bún bò Huế Hồng Thu"
+      }
+    },
+    {
+      "name": "Bánh ướt Biếu Ký",
+      "lat": 10.2360632,
+      "lon": 106.3782418,
+      "tags": {
+        "amenity": "restaurant",
+        "cuisine": "vietnamese",
+        "name": "Bánh ướt Biếu Ký"
+      }
+    },
+    {
+      "name": "Bún thịt nướng",
+      "lat": 10.2364011,
+      "lon": 106.3721907,
+      "tags": {
+        "amenity": "restaurant",
+        "cuisine": "vietnamese",
+        "name": "Bún thịt nướng",
+        "opening_hours": "Mo-Su 17:00-21:00"
+      }
+    },
+    {
+      "name": "Cơm chay chùa Viên Minh",
+      "lat": 10.2349705,
+      "lon": 106.3639403,
+      "tags": {
+        "amenity": "restaurant",
+        "diet:vegetarian": "only",
+        "name": "Cơm chay chùa Viên Minh"
+      }
+    },
+    {
+      "name": "Quán Bạn",
+      "lat": 10.2355293,
+      "lon": 106.3637976,
+      "tags": {
+        "amenity": "restaurant",
+        "cuisine": "vietnamese",
+        "name": "Quán Bạn"
+      }
+    },
+    {
+      "name": "Bún riêu Thảo",
+      "lat": 10.2369099,
+      "lon": 106.3723306,
+      "tags": {
+        "addr:street": "Ngô Quyền",
+        "amenity": "restaurant",
+        "cuisine": "vietnamese",
+        "name": "Bún riêu Thảo"
+      }
+    },
+    {
+      "name": "Ben Tre Floating Restaurant",
+      "lat": 10.2329878,
+      "lon": 106.3686418,
+      "tags": {
+        "amenity": "restaurant",
+        "cuisine": "regional",
+        "name": "Ben Tre Floating Restaurant"
+      }
+    },
+    {
+      "name": "Hùng Vương",
+      "lat": 10.2345939,
+      "lon": 106.3742792,
+      "tags": {
+        "addr:street": "Hùng Vương",
+        "amenity": "restaurant",
+        "cuisine": "diner;breakfast;coffee_shop;noodles;deli",
+        "internet_access": "wlan",
+        "name": "Hùng Vương",
+        "opening_hours": "Mo-Su 07:00-22:00"
+      }
+    },
+    {
+      "name": "Cháo lòng",
+      "lat": 10.2368612,
+      "lon": 106.3699989,
+      "tags": {
+        "addr:street": "Đoàn Hoàng Minh",
+        "amenity": "restaurant",
+        "name": "Cháo lòng",
+        "opening_hours": "Mo-Su 16:00-18:00"
+      }
+    },
+    {
+      "name": "Bì bún- Bánh ướt",
+      "lat": 10.2380441,
+      "lon": 106.372603,
+      "tags": {
+        "addr:street": "Ngô Quyền",
+        "amenity": "restaurant",
+        "cuisine": "deli",
+        "name": "Bì bún- Bánh ướt",
+        "opening_hours": "Mo-Su 16:00-21:30"
+      }
+    },
+    {
+      "name": "Mì cay Korea",
+      "lat": 10.2383177,
+      "lon": 106.3739533,
+      "tags": {
+        "addr:street": "Tán Kế",
+        "amenity": "restaurant",
+        "cuisine": "noodles;deli;korean",
+        "internet_access": "wlan",
+        "name": "Mì cay Korea",
+        "opening_hours": "Mo-Su 07:00-22:00"
+      }
+    },
+    {
+      "name": "mien tay riverside restaurant",
+      "lat": 10.3309782,
+      "lon": 106.3776712,
+      "tags": {
+        "amenity": "restaurant",
+        "name": "mien tay riverside restaurant",
+        "name:vi": "mien tay riverside restaurant ели пили"
+      }
+    },
+    {
+      "name": "Không có tên",
+      "lat": 10.2296492,
+      "lon": 106.3764939,
+      "tags": {
+        "addr:street": "On the canal",
+        "amenity": "cafe"
+      }
+    },
+    {
+      "name": "Vịt nướng lộc phát 8",
+      "lat": 10.2409755,
+      "lon": 106.3805559,
+      "tags": {
+        "amenity": "restaurant",
+        "diet:vegan": "yes",
+        "name": "Vịt nướng lộc phát 8",
+        "opening_hours": "Mo-Su 06:00-19:00"
+      }
+    },
+    {
+      "name": "Không có tên",
+      "lat": 10.3252599,
+      "lon": 106.3696154,
+      "tags": {
+        "amenity": "restaurant",
+        "cuisine": "vietnamese"
+      }
+    },
+    {
+      "name": "Mì Vịt Tiềm",
+      "lat": 10.230196,
+      "lon": 106.3599561,
+      "tags": {
+        "addr:street": "Cầu Bến Tre 2",
+        "amenity": "restaurant",
+        "cuisine": "noodles;chinese",
+        "name": "Mì Vịt Tiềm",
+        "opening_hours": "Mo-Su 16:00-20:00"
+      }
+    },
+    {
+      "name": "Cơm tấm dì Vân",
+      "lat": 10.2521516,
+      "lon": 106.39605,
+      "tags": {
+        "amenity": "restaurant",
+        "name": "Cơm tấm dì Vân",
+        "opening_hours": "Mo-Sa 06:00-10:00"
+      }
+    },
+    {
+      "name": "Quán 3D",
+      "lat": 10.2268014,
+      "lon": 106.3681914,
+      "tags": {
+        "amenity": "restaurant",
+        "cuisine": "deli",
+        "internet_access": "wlan",
+        "name": "Quán 3D"
+      }
+    },
+    {
+      "name": "Cơm gà xối mỡ",
+      "lat": 10.2361979,
+      "lon": 106.3825793,
+      "tags": {
+        "amenity": "restaurant",
+        "cuisine": "chicken",
+        "name": "Cơm gà xối mỡ",
+        "name:vi": "Cơm gà xối mỡ",
+        "opening_hours": "Mo-Su 12:30-20:30"
+      }
+    },
+    {
+      "name": "Cơm Lu",
+      "lat": 10.2362318,
+      "lon": 106.3576169,
+      "tags": {
+        "addr:street": "Tránh Quốc lộ 60",
+        "amenity": "restaurant",
+        "cuisine": "diner;vietnamese",
+        "name": "Cơm Lu",
+        "opening_hours": "Mo-Su 17:00-21:00"
+      }
+    },
+    {
+      "name": "Kem xôi dừa",
+      "lat": 10.2338858,
+      "lon": 106.358678,
+      "tags": {
+        "addr:street": "Tránh Quốc lộ 60",
+        "amenity": "restaurant",
+        "cuisine": "coffee_shop;ice_cream",
+        "internet_access": "wlan",
+        "name": "Kem xôi dừa",
+        "opening_hours": "Mo-Su 18:00-22:00"
+      }
+    },
+    {
+      "name": "Thanh Nhẫn",
+      "lat": 10.2400325,
+      "lon": 106.3802838,
+      "tags": {
+        "addr:street": "Lộ số 4",
+        "amenity": "restaurant",
+        "cuisine": "seafood;deli;grill;fish",
+        "internet_access": "wlan",
+        "name": "Thanh Nhẫn",
+        "opening_hours": "Mo-Su 17:00-22:00"
+      }
+    },
+    {
+      "name": "BBQ",
+      "lat": 10.2398026,
+      "lon": 106.3778933,
+      "tags": {
+        "addr:street": "Lộ Số 4",
+        "amenity": "restaurant",
+        "cuisine": "grill",
+        "internet_access": "wlan",
+        "name": "BBQ",
+        "opening_hours": "Mo-Su 15:00-23:00"
+      }
+    },
+    {
+      "name": "Không có tên",
+      "lat": 10.2339849,
+      "lon": 106.3696101,
+      "tags": {
+        "amenity": "restaurant",
+        "name:en": "Hu Tieu"
+      }
+    },
+    {
+      "name": "Quán Chay 71",
+      "lat": 10.2397008,
+      "lon": 106.3753782,
+      "tags": {
+        "addr:street": "30/4",
+        "amenity": "restaurant",
+        "cuisine": "deli;tea",
+        "diet:vegan": "yes",
+        "internet_access": "wlan",
+        "name": "Quán Chay 71",
+        "opening_hours": "Mo-Su 08:00-22:00"
+      }
+    },
+    {
+      "name": "Ốc F3",
+      "lat": 10.2382388,
+      "lon": 106.373851,
+      "tags": {
+        "amenity": "restaurant",
+        "cuisine": "seafood",
+        "internet_access": "wlan",
+        "name": "Ốc F3"
+      }
+    },
+    {
+      "name": "Café Hợp Phố Bến Tre",
+      "lat": 10.2457441,
+      "lon": 106.3748007,
+      "tags": {
+        "amenity": "cafe",
+        "name": "Café Hợp Phố Bến Tre",
+        "name:en": "Hop Pho Cafe",
+        "name:vi": "Café Hợp Phố Bến Tre"
+      }
+    },
+    {
+      "name": "Không có tên",
+      "lat": 10.2341794,
+      "lon": 106.3713415,
+      "tags": {
+        "addr:housenumber": "51",
+        "addr:street": "Ngô Quyền",
+        "amenity": "restaurant",
+        "name:en": "Thuy Pizza",
+        "phone": "01299833999"
+      }
+    },
+    {
+      "name": "Không có tên",
+      "lat": 10.2101646,
+      "lon": 106.3751056,
+      "tags": {
+        "amenity": "restaurant"
+      }
+    },
+    {
+      "name": "Ngã tư Phú Khương",
+      "lat": 10.2532593,
+      "lon": 106.371275,
+      "tags": {
+        "amenity": "cafe",
+        "name": "Ngã tư Phú Khương"
+      }
+    },
+    {
+      "name": "Cơm chiên",
+      "lat": 10.2376048,
+      "lon": 106.3792585,
+      "tags": {
+        "amenity": "restaurant",
+        "cuisine": "vietnamese",
+        "name": "Cơm chiên",
+        "name:en": "Fried rice",
+        "opening_hours": "Mo-Su 09:00-18:00"
+      }
+    },
+    {
+      "name": "Không có tên",
+      "lat": 10.2841243,
+      "lon": 106.354135,
+      "tags": {
+        "amenity": "cafe",
+        "name:en": "goi dau"
+      }
+    },
+    {
+      "name": "Không có tên",
+      "lat": 10.3228738,
+      "lon": 106.3466767,
+      "tags": {
+        "amenity": "cafe",
+        "internet_access": "wlan",
+        "name:en": "cafe vong"
+      }
+    },
+    {
+      "name": "Không có tên",
+      "lat": 10.3199261,
+      "lon": 106.3478796,
+      "tags": {
+        "amenity": "cafe"
+      }
+    },
+    {
+      "name": "Không có tên",
+      "lat": 10.2999064,
+      "lon": 106.3506479,
+      "tags": {
+        "amenity": "cafe"
+      }
+    },
+    {
+      "name": "Không có tên",
+      "lat": 10.2908602,
+      "lon": 106.3525722,
+      "tags": {
+        "amenity": "cafe",
+        "name:en": "tuyet phong"
+      }
+    },
+    {
+      "name": "Không có tên",
+      "lat": 10.2677133,
+      "lon": 106.3591045,
+      "tags": {
+        "amenity": "cafe",
+        "name:en": "chat cafe"
+      }
+    },
+    {
+      "name": "Không có tên",
+      "lat": 10.2433421,
+      "lon": 106.3798258,
+      "tags": {
+        "amenity": "restaurant",
+        "name:en": "Vegetarian restaurant"
+      }
+    },
+    {
+      "name": "CAFE Hoa Viên",
+      "lat": 10.2547871,
+      "lon": 106.3818126,
+      "tags": {
+        "amenity": "cafe",
+        "name": "CAFE Hoa Viên"
+      }
+    },
+    {
+      "name": "CAFE TRUNG NGUYÊN",
+      "lat": 10.2573544,
+      "lon": 106.3839376,
+      "tags": {
+        "amenity": "cafe",
+        "name": "CAFE TRUNG NGUYÊN"
+      }
+    },
+    {
+      "name": "Song Toan",
+      "lat": 10.2535478,
+      "lon": 106.3707353,
+      "tags": {
+        "amenity": "restaurant",
+        "cuisine": "vietnamese",
+        "name": "Song Toan",
+        "name:en": "Song Toan - Cheap Viet Food"
+      }
+    },
+    {
+      "name": "Mai An Tiêm",
+      "lat": 10.2292133,
+      "lon": 106.3775146,
+      "tags": {
+        "amenity": "restaurant",
+        "name": "Mai An Tiêm",
+        "name:en": "Mai An Tiêm Garden Restaurant"
+      }
+    },
+    {
+      "name": "Xứ Dừa",
+      "lat": 10.2110037,
+      "lon": 106.3809965,
+      "tags": {
+        "amenity": "restaurant",
+        "email": "nhahangxudua@gmail.com",
+        "name": "Xứ Dừa",
+        "name:en": "Xu Dua",
+        "phone": "0906986836"
+      }
+    },
+    {
+      "name": "Vąn Phúc - còm chay (vegetarian eatery)",
+      "lat": 10.2313999,
+      "lon": 106.3602472,
+      "tags": {
+        "amenity": "restaurant",
+        "description": "vegetarian buffet food",
+        "diet:vegetarian": "only",
+        "name": "Vąn Phúc - còm chay (vegetarian eatery)",
+        "phone": "+84 2752471417"
+      }
+    },
+    {
+      "name": "Không có tên",
+      "lat": 10.179218,
+      "lon": 106.3715922,
+      "tags": {
+        "amenity": "cafe"
+      }
+    },
+    {
+      "name": "Ca Phe",
+      "lat": 10.2135727,
+      "lon": 106.390444,
+      "tags": {
+        "amenity": "cafe",
+        "name": "Ca Phe"
+      }
+    },
+    {
+      "name": "Cà phê 9999",
+      "lat": 10.2369933,
+      "lon": 106.3778128,
+      "tags": {
+        "amenity": "cafe",
+        "cuisine": "cafe",
+        "name": "Cà phê 9999"
+      }
+    },
+    {
+      "name": "Ca phê Starup cafe",
+      "lat": 10.2391392,
+      "lon": 106.3770997,
+      "tags": {
+        "amenity": "cafe",
+        "name": "Ca phê Starup cafe",
+        "outdoor_seating": "yes"
+      }
+    },
+    {
+      "name": "Cafe Nhà gỗ",
+      "lat": 10.2201533,
+      "lon": 106.3615547,
+      "tags": {
+        "amenity": "cafe",
+        "name": "Cafe Nhà gỗ"
+      }
+    },
+    {
+      "name": "Cafe Ngọc Hân",
+      "lat": 10.2207297,
+      "lon": 106.366073,
+      "tags": {
+        "amenity": "cafe",
+        "name": "Cafe Ngọc Hân"
+      }
+    },
+    {
+      "name": "Không có tên",
+      "lat": 10.2555291,
+      "lon": 106.3680827,
+      "tags": {
+        "amenity": "restaurant",
+        "name:en": "Awesome Pho Bó"
+      }
+    },
+    {
+      "name": "Quan Thu Ngân",
+      "lat": 10.2341681,
+      "lon": 106.3714657,
+      "tags": {
+        "amenity": "restaurant",
+        "cuisine": "steak_house;italian",
+        "internet_access": "wlan",
+        "name": "Quan Thu Ngân",
+        "name:en": "Steakhouse"
+      }
+    },
+    {
+      "name": "Cơm Chay",
+      "lat": 10.2429475,
+      "lon": 106.3797507,
+      "tags": {
+        "amenity": "restaurant",
+        "name": "Cơm Chay",
+        "name:en": "vegan restaurant"
+      }
+    },
+    {
+      "name": "Không có tên",
+      "lat": 10.3225623,
+      "lon": 106.3488608,
+      "tags": {
+        "amenity": "restaurant"
+      }
+    },
+    {
+      "name": "Khu du lịch sinh thái Làng Bè",
+      "lat": 10.3276125,
+      "lon": 106.3512572,
+      "tags": {
+        "addr:city": "Bến Tre",
+        "addr:district": "Châu Thành",
+        "addr:housenumber": "6B",
+        "addr:province": "Bến Tre",
+        "addr:street": "Ấp Mỹ An",
+        "addr:subdistrict": "An Khánh",
+        "amenity": "restaurant",
+        "cuisine": "vietnamese;fish",
+        "name": "Khu du lịch sinh thái Làng Bè",
+        "phone": "0947278822"
+      }
+    },
+    {
+      "name": "Bida",
+      "lat": 10.2144196,
+      "lon": 106.3744596,
+      "tags": {
+        "amenity": "cafe",
+        "name": "Bida"
+      }
+    },
+    {
+      "name": "Hu Tieu Chay (vegetarian)",
+      "lat": 10.2105219,
+      "lon": 106.3694915,
+      "tags": {
+        "amenity": "restaurant",
+        "diet:vegetarian": "only",
+        "name": "Hu Tieu Chay (vegetarian)"
+      }
+    },
+    {
+      "name": "Pho Hu Tieu Chay (name TBC)",
+      "lat": 10.2122344,
+      "lon": 106.3684123,
+      "tags": {
+        "amenity": "restaurant",
+        "name": "Pho Hu Tieu Chay (name TBC)"
+      }
+    },
+    {
+      "name": "Giai Khat",
+      "lat": 10.2125084,
+      "lon": 106.3729019,
+      "tags": {
+        "amenity": "cafe",
+        "name": "Giai Khat"
+      }
+    },
+    {
+      "name": "Không có tên",
+      "lat": 10.2099688,
+      "lon": 106.368772,
+      "tags": {
+        "amenity": "cafe"
+      }
+    },
+    {
+      "name": "Không có tên",
+      "lat": 10.2353241,
+      "lon": 106.3788694,
+      "tags": {
+        "amenity": "cafe"
+      }
+    },
+    {
+      "name": "Không có tên",
+      "lat": 10.2365568,
+      "lon": 106.3844682,
+      "tags": {
+        "amenity": "cafe"
+      }
+    },
+    {
+      "name": "Không có tên",
+      "lat": 10.231521,
+      "lon": 106.3599029,
+      "tags": {
+        "amenity": "cafe",
+        "name:en": "DOM COFFE"
+      }
+    },
+    {
+      "name": "Cà Phé Mosaic",
+      "lat": 10.2571004,
+      "lon": 106.3776482,
+      "tags": {
+        "addr:city": "thành phố Bến Tre",
+        "addr:district": "phường Phú Tân",
+        "addr:housenumber": "B1 - B2",
+        "addr:postcode": "86000",
+        "addr:province": "Bến Tre",
+        "addr:street": "Nguyễn Thị Định",
+        "addr:subdistrict": "Khu đô thị Hưng Phú",
+        "amenity": "cafe",
+        "cuisine": "coffee_shop;cake;cafe",
+        "internet_access": "yes",
+        "internet_access:fee": "no",
+        "internet_access:ssid": "CaPheMosaic",
+        "name": "Cà Phé Mosaic",
+        "opening_hours": "Mo-Su 08:00-22:00",
+        "outdoor_seating": "yes",
+        "phone": "+84 775875858",
+        "website": "https://www.facebook.com/caphemosaic"
+      }
+    },
+    {
+      "name": "Garlic Cafe - Bida - Hát Với Nhau",
+      "lat": 10.2650989,
+      "lon": 106.4066364,
+      "tags": {
+        "addr:subdistrict": "Hữu Định",
+        "amenity": "cafe",
+        "internet_access": "yes",
+        "internet_access:fee": "no",
+        "name": "Garlic Cafe - Bida - Hát Với Nhau",
+        "opening_hours": "Mo-Su 09:00-21:00",
+        "outdoor_seating": "yes"
+      }
+    },
+    {
+      "name": "Tà Sữa Japo",
+      "lat": 10.2622728,
+      "lon": 106.4136538,
+      "tags": {
+        "amenity": "cafe",
+        "name": "Tà Sữa Japo"
+      }
+    },
+    {
+      "name": "Hủ Tiếu Mỹ Tho",
+      "lat": 10.257993,
+      "lon": 106.4245602,
+      "tags": {
+        "amenity": "restaurant",
+        "name": "Hủ Tiếu Mỹ Tho"
+      }
+    },
+    {
+      "name": "Cà Phê / Rửa Xe",
+      "lat": 10.2559162,
+      "lon": 106.429309,
+      "tags": {
+        "amenity": "cafe",
+        "name": "Cà Phê / Rửa Xe"
+      }
+    },
+    {
+      "name": "Cà Phê Võng Tiến Ngọc",
+      "lat": 10.2617978,
+      "lon": 106.4139332,
+      "tags": {
+        "amenity": "cafe",
+        "name": "Cà Phê Võng Tiến Ngọc"
+      }
+    },
+    {
+      "name": "Bánh Canh Vịt Chị Bảy",
+      "lat": 10.2612076,
+      "lon": 106.4165823,
+      "tags": {
+        "amenity": "restaurant",
+        "name": "Bánh Canh Vịt Chị Bảy"
+      }
+    },
+    {
+      "name": "Cà Phê Khánh Ngân",
+      "lat": 10.2645489,
+      "lon": 106.4072868,
+      "tags": {
+        "amenity": "cafe",
+        "name": "Cà Phê Khánh Ngân"
+      }
+    },
+    {
+      "name": "Không có tên",
+      "lat": 10.2590456,
+      "lon": 106.4256477,
+      "tags": {
+        "amenity": "cafe"
+      }
+    },
+    {
+      "name": "Quán Nhậu Đô Bất Tử",
+      "lat": 10.2688118,
+      "lon": 106.4109164,
+      "tags": {
+        "amenity": "restaurant",
+        "name": "Quán Nhậu Đô Bất Tử"
+      }
+    },
+    {
+      "name": "Cà Phê Ông Bầu",
+      "lat": 10.2521373,
+      "lon": 106.3996624,
+      "tags": {
+        "amenity": "cafe",
+        "name": "Cà Phê Ông Bầu"
+      }
+    },
+    {
+      "name": "Trà Sữa Hebe - Thánh Bào Tây Balo",
+      "lat": 10.240245,
+      "lon": 106.3732545,
+      "tags": {
+        "amenity": "cafe",
+        "name": "Trà Sữa Hebe - Thánh Bào Tây Balo"
+      }
+    },
+    {
+      "name": "Sài Gòn  Coffee & More",
+      "lat": 10.2455425,
+      "lon": 106.3735346,
+      "tags": {
+        "amenity": "cafe",
+        "name": "Sài Gòn  Coffee & More"
+      }
+    },
+    {
+      "name": "Mì Kung Fu Bến Tre",
+      "lat": 10.2457083,
+      "lon": 106.374505,
+      "tags": {
+        "amenity": "restaurant",
+        "cuisine": "noodle",
+        "name": "Mì Kung Fu Bến Tre"
+      }
+    },
+    {
+      "name": "Bằng Lăng Quán",
+      "lat": 10.2686652,
+      "lon": 106.3710048,
+      "tags": {
+        "amenity": "restaurant",
+        "name": "Bằng Lăng Quán"
+      }
+    },
+    {
+      "name": "Cafe Làng Văn",
+      "lat": 10.2487155,
+      "lon": 106.3553738,
+      "tags": {
+        "amenity": "cafe",
+        "name": "Cafe Làng Văn"
+      }
+    },
+    {
+      "name": "Lekao's Coffee",
+      "lat": 10.2551525,
+      "lon": 106.3685881,
+      "tags": {
+        "amenity": "cafe",
+        "name": "Lekao's Coffee"
+      }
+    },
+    {
+      "name": "Ẩm Thực Kim Phú Quý",
+      "lat": 10.2259622,
+      "lon": 106.3696956,
+      "tags": {
+        "amenity": "restaurant",
+        "name": "Ẩm Thực Kim Phú Quý"
+      }
+    },
+    {
+      "name": "KING BBQ",
+      "lat": 10.251215,
+      "lon": 106.3568522,
+      "tags": {
+        "amenity": "restaurant",
+        "name": "KING BBQ"
+      }
+    },
+    {
+      "name": "Ao Sen Quán",
+      "lat": 10.2528039,
+      "lon": 106.3566323,
+      "tags": {
+        "amenity": "restaurant",
+        "name": "Ao Sen Quán"
+      }
+    },
+    {
+      "name": "Nhà Hàng An Nam",
+      "lat": 10.2284603,
+      "lon": 106.3750333,
+      "tags": {
+        "addr:city": "Bến Tre",
+        "addr:housenumber": "898",
+        "addr:street": "Nguyễn Văn Nguyễn",
+        "addr:subdistrict": "Mỹ Thạnh An",
+        "amenity": "restaurant",
+        "name": "Nhà Hàng An Nam",
+        "opening_hours": "24/7",
+        "phone": "0704705706",
+        "website": "https://amthucannam.com.vn/"
+      }
+    },
+    {
+      "name": "Bò Sốt Hẻm",
+      "lat": 10.2521044,
+      "lon": 106.3619122,
+      "tags": {
+        "amenity": "restaurant",
+        "cuisine": "vietnamese",
+        "name": "Bò Sốt Hẻm"
+      }
+    },
+    {
+      "name": "Mr.P Bingsu & Tea",
+      "lat": 10.2342967,
+      "lon": 106.3583571,
+      "tags": {
+        "addr:city": "Bến Tre",
+        "addr:district": "Bến Tre",
+        "addr:housenumber": "314",
+        "addr:province": "Bến",
+        "addr:street": "Đồng Văn Cống",
+        "addr:subdistrict": "Phường 7",
+        "amenity": "cafe",
+        "cuisine": "coffee_shop",
+        "name": "Mr.P Bingsu & Tea",
+        "phone": "0948834787"
+      }
+    },
+    {
+      "name": "Quán Bảy Thép",
+      "lat": 10.235383,
+      "lon": 106.3574605,
+      "tags": {
+        "amenity": "restaurant",
+        "cuisine": "asian",
+        "name": "Quán Bảy Thép"
+      }
+    },
+    {
+      "name": "Ẩm Thực Mộc Thiên",
+      "lat": 10.2463604,
+      "lon": 106.3546282,
+      "tags": {
+        "addr:city": "Bến Tre",
+        "addr:district": "Bến Tre",
+        "addr:housenumber": "13A",
+        "addr:province": "Bến Tre",
+        "addr:street": "Võ Nguyên Giáp",
+        "addr:subdistrict": "Phường 6",
+        "amenity": "restaurant",
+        "cuisine": "asian",
+        "name": "Ẩm Thực Mộc Thiên",
+        "phone": "0369687368",
+        "website": "https://amthucmocthien.com/"
+      }
+    },
+    {
+      "name": "Làng Chài SeaFood",
+      "lat": 10.2410152,
+      "lon": 106.3564024,
+      "tags": {
+        "addr:city": "Bến Tre",
+        "addr:housenumber": "99G",
+        "addr:street": "Đồng Văn Cống",
+        "amenity": "restaurant",
+        "cuisine": "asian",
+        "name": "Làng Chài SeaFood",
+        "phone": "0978733338",
+        "website": "http://langchaibentre.com/"
+      }
+    },
+    {
+      "name": "Cafe Phố Xanh",
+      "lat": 10.2569809,
+      "lon": 106.3711504,
+      "tags": {
+        "amenity": "cafe",
+        "name": "Cafe Phố Xanh"
+      }
+    },
+    {
+      "name": "Nhà hàng Đồng Khởi 2 TTC",
+      "lat": 10.2450327,
+      "lon": 106.3749537,
+      "tags": {
+        "addr:city": "Bến Tre",
+        "addr:district": "Bến Tre",
+        "addr:housenumber": "210B",
+        "addr:province": "Bến Tre",
+        "addr:street": "Đồng Khởi",
+        "addr:subdistrict": "Phú Khương",
+        "amenity": "restaurant",
+        "cuisine": "regional;chinese;chicken;asian",
+        "name": "Nhà hàng Đồng Khởi 2 TTC",
+        "phone": "02753511855"
+      }
+    },
+    {
+      "name": "Lagi Coffee Bến Tre",
+      "lat": 10.2501763,
+      "lon": 106.3768466,
+      "tags": {
+        "addr:city": "Bến Tre",
+        "addr:district": "Bến Tre",
+        "addr:housenumber": "626",
+        "addr:province": "Bến Tre",
+        "addr:street": "Ca Văn Thỉnh",
+        "addr:subdistrict": "Phú Khương",
+        "amenity": "cafe",
+        "internet_access": "wlan",
+        "internet_access:fee": "no",
+        "name": "Lagi Coffee Bến Tre",
+        "phone": "0964012012"
+      }
+    },
+    {
+      "name": "Nhà Hàng Phố Lộc",
+      "lat": 10.2227242,
+      "lon": 106.3655022,
+      "tags": {
+        "addr:city": "Bến Tre",
+        "addr:district": "Bến Tre",
+        "addr:province": "Bến Tre",
+        "addr:street": "Nguyễn Văn Nguyễn",
+        "addr:subdistrict": "Mỹ Thạnh An",
+        "amenity": "restaurant",
+        "name": "Nhà Hàng Phố Lộc",
+        "phone": "+84 869 347 879 ·"
+      }
+    },
+    {
+      "name": "Hương Tràm Quán",
+      "lat": 10.2260146,
+      "lon": 106.3746038,
+      "tags": {
+        "amenity": "restaurant",
+        "name": "Hương Tràm Quán"
+      }
+    },
+    {
+      "name": "Phố Tình Ca",
+      "lat": 10.2204554,
+      "lon": 106.372706,
+      "tags": {
+        "amenity": "cafe",
+        "name": "Phố Tình Ca"
+      }
+    },
+    {
+      "name": "Hủ Tiếu Thánh Liệu",
+      "lat": 10.2650701,
+      "lon": 106.4063673,
+      "tags": {
+        "amenity": "restaurant",
+        "cuisine": "vietnamese",
+        "name": "Hủ Tiếu Thánh Liệu"
+      }
+    },
+    {
+      "name": "Cháo Lòng Hữu Định",
+      "lat": 10.2644618,
+      "lon": 106.4075251,
+      "tags": {
+        "amenity": "restaurant",
+        "cuisine": "vietnamese",
+        "name": "Cháo Lòng Hữu Định"
+      }
+    },
+    {
+      "name": "MAY forest",
+      "lat": 10.2425512,
+      "lon": 106.3765061,
+      "tags": {
+        "amenity": "cafe",
+        "name": "MAY forest"
+      }
+    },
+    {
+      "name": "Không có tên",
+      "lat": 10.3108822,
+      "lon": 106.352903,
+      "tags": {
+        "amenity": "restaurant",
+        "cuisine": "vietnamese",
+        "diet:vegetarian": "yes"
+      }
+    },
+    {
+      "name": "Cà Phê Vòng Thành Đô",
+      "lat": 10.1585159,
+      "lon": 106.3297097,
+      "tags": {
+        "amenity": "cafe",
+        "name": "Cà Phê Vòng Thành Đô",
+        "phone": "+84 366114440"
+      }
+    },
+    {
+      "name": "Quán 6 xược",
+      "lat": 10.2584444,
+      "lon": 106.3839031,
+      "tags": {
+        "amenity": "restaurant",
+        "name": "Quán 6 xược",
+        "phone": "+84 987 209 655"
+      }
+    },
+    {
+      "name": "Bem",
+      "lat": 10.2582303,
+      "lon": 106.3832347,
+      "tags": {
+        "amenity": "cafe",
+        "name": "Bem",
+        "phone": "+84 327 258 468"
+      }
+    },
+    {
+      "name": "Không có tên",
+      "lat": 10.3106497,
+      "lon": 106.3528082,
+      "tags": {
+        "amenity": "cafe"
+      }
+    },
+    {
+      "name": "Bang Giá",
+      "lat": 10.3412691,
+      "lon": 106.3638358,
+      "tags": {
+        "amenity": "cafe",
+        "cuisine": "tea",
+        "name": "Bang Giá"
+      }
+    },
+    {
+      "name": "Nhà hàng sinh thái MeKong",
+      "lat": 10.330266,
+      "lon": 106.3736375,
+      "tags": {
+        "amenity": "restaurant",
+        "cuisine": "vietnamese",
+        "name": "Nhà hàng sinh thái MeKong"
+      }
+    },
+    {
+      "name": "Ẩm thực KiM DƯƠNG - Vịt nấu chao - Cà phê câu cá",
+      "lat": 10.2414711,
+      "lon": 106.4043991,
+      "tags": {
+        "addr:city": "Xã Phú Hưng",
+        "addr:housenumber": "184",
+        "addr:province": "TP Bến Tre",
+        "addr:street": "Nguyễn Thị Định",
+        "addr:subdistrict": "Ấp phú chiến",
+        "amenity": "restaurant",
+        "cuisine": "vietnamese;coffee_shop",
+        "diet:meat": "yes",
+        "name": "Ẩm thực KiM DƯƠNG - Vịt nấu chao - Cà phê câu cá",
+        "opening_hours": "Mo-Su 09:00-21:00",
+        "phone": "+84 705166668",
+        "website": "https://www.facebook.com/caucakimduong"
+      }
+    },
+    {
+      "name": "Hủ tíu chay Quý Thuận",
+      "lat": 10.3498407,
+      "lon": 106.4775001,
+      "tags": {
+        "amenity": "restaurant",
+        "name": "Hủ tíu chay Quý Thuận",
+        "opening_hours": "Mo-Su,PH 06:00-19:00"
+      }
+    },
+    {
+      "name": "Thanh Long",
+      "lat": 10.306442,
+      "lon": 106.3499122,
+      "tags": {
+        "amenity": "restaurant",
+        "cuisine": "asian",
+        "name": "Thanh Long"
+      }
+    },
+    {
+      "name": "TÂY ĐÔ - BÒ SỐT HÀU",
+      "lat": 10.2489719,
+      "lon": 106.3785033,
+      "tags": {
+        "addr:city": "Bến Tre",
+        "addr:district": "Bến Tre",
+        "addr:housenumber": "Lô 310-311",
+        "addr:province": "Bến Tre",
+        "addr:street": "đường số 1",
+        "addr:subdistrict": "Phú Khương",
+        "amenity": "restaurant",
+        "cuisine": "quán_ăn;giải_khát",
+        "diet:fresh": "yes",
+        "name": "TÂY ĐÔ - BÒ SỐT HÀU",
+        "opening_hours": "Mo-Su 15:00-22:00",
+        "phone": "0389223539"
+      }
+    }
+  ],
+  "attractions": [
+    {
+      "name": "nhà cổ bên kia cầu",
+      "lat": 10.234146,
+      "lon": 106.3707828,
+      "tags": {
+        "name": "nhà cổ bên kia cầu",
+        "tourism": "museum"
+      }
+    },
+    {
+      "name": "Không có tên",
+      "lat": 10.3313702,
+      "lon": 106.3771546,
+      "tags": {
+        "name:en": "Coconut Factory and Shop",
+        "tourism": "attraction"
+      }
+    },
+    {
+      "name": "Không có tên",
+      "lat": 10.3326188,
+      "lon": 106.3890371,
+      "tags": {
+        "name:zh": "第一站",
+        "tourism": "attraction"
+      }
+    },
+    {
+      "name": "Không có tên",
+      "lat": 10.3260904,
+      "lon": 106.3509412,
+      "tags": {
+        "name:zh": "可可糖",
+        "tourism": "attraction"
+      }
+    },
+    {
+      "name": "Không có tên",
+      "lat": 10.3197079,
+      "lon": 106.3496133,
+      "tags": {
+        "name:zh": "蜜蜂",
+        "tourism": "attraction"
+      }
+    },
+    {
+      "name": "Phường 8 Thành phố Bến Tre",
+      "lat": 10.2359501,
+      "lon": 106.3870274,
+      "tags": {
+        "name": "Phường 8 Thành phố Bến Tre",
+        "name:vi": "Phường 8 Thành phố Bến Tre",
+        "tourism": "museum"
+      }
+    },
+    {
+      "name": "ẤP BÌNH TẠO XÃ TRUNG AN",
+      "lat": 10.3497469,
+      "lon": 106.3360172,
+      "tags": {
+        "name": "ẤP BÌNH TẠO XÃ TRUNG AN",
+        "name:vi": "ẤP BÌNH TẠO XÃ TRUNG AN",
+        "tourism": "museum"
+      }
+    },
+    {
+      "name": "XÃ AN THẠNH THỦY",
+      "lat": 10.3272739,
+      "lon": 106.4621553,
+      "tags": {
+        "name": "XÃ AN THẠNH THỦY",
+        "name:vi": "XÃ AN THẠNH THỦY",
+        "tourism": "museum"
+      }
+    },
+    {
+      "name": "Không có tên",
+      "lat": 10.3412196,
+      "lon": 106.3540051,
+      "tags": {
+        "name:ja": "タイソン島",
+        "tourism": "attraction"
+      }
+    },
+    {
+      "name": "Không có tên",
+      "lat": 10.3354007,
+      "lon": 106.3632182,
+      "tags": {
+        "name:en": "Phung or Pheonix Island",
+        "tourism": "attraction"
+      }
+    },
+    {
+      "name": "Tan Long",
+      "lat": 10.3464154,
+      "lon": 106.3766881,
+      "tags": {
+        "name": "Tan Long",
+        "name:en": "Tan Long or Dragon Island",
+        "name:ko": "떤롱 (용섬)",
+        "tourism": "attraction"
+      }
+    },
+    {
+      "name": "Quy",
+      "lat": 10.3342589,
+      "lon": 106.3846369,
+      "tags": {
+        "name": "Quy",
+        "name:en": "Quy or Tortoise Island",
+        "name:ko": "꾸이섬(거북섬)",
+        "tourism": "attraction"
+      }
+    },
+    {
+      "name": "Phung",
+      "lat": 10.3354008,
+      "lon": 106.3634983,
+      "tags": {
+        "name": "Phung",
+        "name:en": "Phung or Pheonix Island",
+        "name:ko": "풍섬(피닉스섬)",
+        "tourism": "attraction"
+      }
+    },
+    {
+      "name": "Không có tên",
+      "lat": 10.3433697,
+      "lon": 106.3550928,
+      "tags": {
+        "name:en": "Bee farm and python photo",
+        "tourism": "attraction"
+      }
+    },
+    {
+      "name": "Khu du lịch Thới Sơn",
+      "lat": 10.34112,
+      "lon": 106.3596644,
+      "tags": {
+        "name": "Khu du lịch Thới Sơn",
+        "tourism": "viewpoint"
+      }
+    },
+    {
+      "name": "Không có tên",
+      "lat": 10.2115377,
+      "lon": 106.3847241,
+      "tags": {
+        "name:en": "billiards",
+        "tourism": "attraction"
+      }
+    },
+    {
+      "name": "Không có tên",
+      "lat": 10.1846344,
+      "lon": 106.3691508,
+      "tags": {
+        "name:en": "Long Thanh Island",
+        "tourism": "attraction"
+      }
+    },
+    {
+      "name": "Khu Du Lịch Quê Dừa - Quê Dừa Restaurant",
+      "lat": 10.3283572,
+      "lon": 106.353118,
+      "tags": {
+        "name": "Khu Du Lịch Quê Dừa - Quê Dừa Restaurant",
+        "tourism": "attraction"
+      }
+    },
+    {
+      "name": "Không có tên",
+      "lat": 10.3292553,
+      "lon": 106.3765541,
+      "tags": {
+        "name:en": "village",
+        "tourism": "attraction"
+      }
+    },
+    {
+      "name": "Coconut opening",
+      "lat": 10.1668055,
+      "lon": 106.385839,
+      "tags": {
+        "name": "Coconut opening",
+        "tourism": "attraction"
+      }
+    },
+    {
+      "name": "Pangasus farm",
+      "lat": 10.1722062,
+      "lon": 106.3735033,
+      "tags": {
+        "name": "Pangasus farm",
+        "tourism": "attraction"
+      }
+    }
+  ]
+}
