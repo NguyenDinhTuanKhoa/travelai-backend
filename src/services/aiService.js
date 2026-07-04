@@ -824,6 +824,12 @@ class AIService {
         d._nn = this.removeVietnameseTones(d.name || '');          // tên không dấu, thường
         d._nc = this.removeVietnameseTones(d.location?.city || ''); // city không dấu, thường
         d._core = this.coreDestName(d._nn);                          // lõi tên (bỏ tiền tố loại hình)
+        // Bản GIỮ DẤU (đã thường hoá) cho khớp có xác thực dấu — chặn kiểu "hàng trong"
+        // (nhà hàng trong resort) khớp nhầm "Hang Trống" vì cùng ra "hang trong" khi bỏ dấu.
+        // _nn (bỏ dấu) và _nnT (giữ dấu) căn chỉnh 1:1 vì ký tự tiếng Việt tiền tổ hợp đều
+        // 1 code unit → lõi có dấu = cắt _nnT tại ĐÚNG offset mà coreDestName cắt khỏi _nn.
+        d._nnT = String(d.name || '').normalize('NFC').toLowerCase();
+        d._coreT = d._nnT.slice(d._nn.length - d._core.length);
       }
       this.destLiteCache = docs;
       this.destLiteCacheTime = Date.now();
@@ -865,6 +871,40 @@ class AIService {
     }
   }
 
+  // Tách chuỗi thành cặp song song CÙNG ĐỘ DÀI (UTF-16): `toned` = NFC thường hoá GIỮ DẤU,
+  // `base` = bỏ dấu. Mỗi ký tự map 1:1 → index tìm được trên `base` dùng thẳng trên `toned`
+  // để đối chiếu dấu tại đúng vị trí khớp.
+  toneAlignedLower(str) {
+    const chars = Array.from(String(str || '').normalize('NFC').toLowerCase());
+    const base = chars.map(ch => {
+      const s = ch.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/đ/g, 'd');
+      return s.length === ch.length ? s : ch; // ký tự lạ không map 1:1 → giữ nguyên cho thẳng hàng
+    });
+    return { toned: chars.join(''), base: base.join('') };
+  }
+
+  // containsWord + XÁC THỰC DẤU: tìm theo ranh giới từ trên bản bỏ dấu, nhưng đoạn text tại
+  // vị trí khớp phải ĐÚNG DẤU với tên (hoặc chính đoạn đó viết trần không dấu — người gõ tắt).
+  // Chặn false-positive ghép chéo từ kiểu "nhà HÀNG TRONG resort" ≈ "Hang Trống" — hai cụm
+  // này chỉ trùng nhau SAU KHI bỏ dấu ("hang trong"), so bản giữ dấu là phân biệt được ngay.
+  containsWordToneAware(pair, needleBase, needleToned) {
+    if (!pair?.base || !needleBase) return false;
+    let from = 0;
+    while (true) {
+      const idx = pair.base.indexOf(needleBase, from);
+      if (idx === -1) return false;
+      const before = idx === 0 ? '' : pair.base[idx - 1];
+      const after = idx + needleBase.length >= pair.base.length ? '' : pair.base[idx + needleBase.length];
+      const boundaryBefore = !before || !/[a-z0-9]/.test(before);
+      const boundaryAfter = !after || !/[a-z0-9]/.test(after);
+      if (boundaryBefore && boundaryAfter) {
+        const slice = pair.toned.slice(idx, idx + needleBase.length);
+        if (slice === needleToned || slice === needleBase) return true;
+      }
+      from = idx + 1;
+    }
+  }
+
   // Tên 1 TỪ trùng từ thông dụng tiếng Việt → cực dễ false-positive (vd "Thành",
   // "Một", "Mộc", "Gió"). Chỉ nên trích khi có tỉnh ngữ cảnh khớp đúng.
   isAmbiguousShortName(noTonesName) {
@@ -887,6 +927,9 @@ class AIService {
     if (question && this.isGeneralKnowledgeQuery(question)) return [];
     const docs = await this.getDestinationsLite();
     const noTonesText = this.removeVietnameseTones(text);
+    // Cặp song song (bỏ dấu ‖ giữ dấu) để khớp tên địa danh CÓ XÁC THỰC DẤU — chặn kiểu
+    // "nhà hàng trong resort" (→ "hang trong") khớp nhầm "Hang Trống" (Quảng Ninh).
+    const textPair = this.toneAlignedLower(text);
 
     // Bỏ tiền tố hành chính ("TP.", "Tỉnh", "Thành phố") — DB lưu "TP. Hồ Chí Minh" nhưng
     // người dùng gõ tên trần "Hồ Chí Minh"/lõi tên địa danh cũng ra "ho chi minh" KHÔNG
@@ -931,8 +974,9 @@ class AIService {
     const directMatches = docs.filter(d => {
       if (!d._nn || d._nn.length < 4) return false;
       if (this.isAmbiguousShortName(d._nn) && !ctxCities.has(d.location?.city)) return false;
-      if (this.containsWord(noTonesText, d._nn)) return true;
-      return d._core.length >= 5 && !cityNormSet.has(d._core) && this.containsWord(noTonesText, d._core);
+      if (this.containsWordToneAware(textPair, d._nn, d._nnT)) return true;
+      return d._core.length >= 5 && !cityNormSet.has(d._core) &&
+        this.containsWordToneAware(textPair, d._core, d._coreT);
     });
 
     // 2b) Cụm địa danh "chắc chắn có trong text" (bỏ cụm trùng tên tỉnh) → để mở rộng sang
@@ -1096,6 +1140,29 @@ class AIService {
     return /an gi|an cai gi|cai gi an|an thu gi|mon gi|mon nao|mon an|mon khac|con mon|them mon|mon ngon|dac san|an mon|an them|quan an|an o dau|am thuc|do an|an vat|an uong|nau gi|co mon/.test(noTones);
   }
 
+  // Câu hỏi tìm ĐỊA ĐIỂM ăn/ở/uống CỤ THỂ (quán ăn, nhà hàng, khách sạn, cafe, quán nhậu...)
+  // → cần tra Google Local để lấy TÊN + ⭐đánh giá + địa chỉ thật (DB không lưu loại cơ sở này).
+  // Khác isFoodQuestion (hỏi MÓN ăn/đặc sản): đây là hỏi CHỖ. LƯU Ý bỏ dấu: "quan" trùng
+  // "quan tâm/cơ quan/quan trọng" → KHÔNG dùng 'quan' trần, chỉ dùng cụm đặc trưng.
+  isVenueQuery(text) {
+    if (!text) return false;
+    const nq = this.removeVietnameseTones(text);
+    // Loại hình cơ sở (danh từ chỉ quán/chỗ) — cụm đủ đặc trưng để không false-positive
+    const venueTypes = [
+      'quan an', 'nha hang', 'khach san', 'quan cafe', 'quan ca phe', 'ca phe', 'cafe', 'coffee',
+      'quan nhau', 'quan bar', 'rooftop', 'resort', 'homestay', 'nha nghi', 'quan oc', 'quan lau',
+      'quan nuong', 'quan hai san', 'hai san', 'buffet', 'tra sua', 'quan che', 'quan bun',
+      'quan pho', 'quan com', 'quan chay', 'quan an vat', 'diem an uong', 'do uong',
+      // "quán" + tính từ/nghi vấn (đã bỏ dấu) — người dùng hay hỏi kiểu này
+      'quan nao', 'quan re', 'quan ngon', 'quan mac', 'quan gan', 'quan dep', 'quan sang',
+      'quan binh dan', 'quan view', 'quan ven bien',
+    ];
+    if (venueTypes.some(t => nq.includes(t))) return true;
+    // "chỗ/nơi/địa điểm ăn/ở/uống" hoặc "ăn/ngủ/nghỉ ở đâu"
+    return /(cho|noi|dia diem) (an|o|uong|nghi|luu tru|check.?in)/.test(nq)
+      || /(an|o|ngu|nghi|uong) o dau/.test(nq);
+  }
+
   // Câu hỏi KIẾN THỨC CHUNG / hành chính / địa lý (KHÔNG phải hỏi đi chơi) → không hiện
   // card "điểm đến được nhắc đến". Vd: "Việt Nam có bao nhiêu tỉnh", "Trà Vinh còn không",
   // "Hồ Chí Minh là ai". Nếu câu hỏi có Ý ĐỊNH DU LỊCH rõ ràng (đi đâu, chơi gì, ăn gì,
@@ -1252,55 +1319,85 @@ TUYỆT ĐỐI không lặp lại câu trả lời ở lượt trước.`;
       systemPrompt += ITINERARY_JSON_INSTRUCTION;
     }
 
-    // ── Web search fallback: câu hỏi NGOÀI dữ liệu hệ thống → tra Google, KHÔNG bịa ──
-    // Kích hoạt khi: (a) hỏi sự kiện/giá/giờ... cụ thể, HOẶC (b) DB không có gì để trả lời.
+    // ── Tra Google: ĐỊA ĐIỂM ăn/ở (Google Local) HOẶC web fallback — KHÔNG bịa ──────
     if (lastUserMsg) {
       const q = lastUserMsg.content;
       const nq = this.removeVietnameseTones(q);
-      const isFactual = this.isFactualQuery(q);
+      const loc = regionInfo?.province || regionInfo?.region || '';
       const isTourSearch = detectTourSearchQuery(messages);
-      // User nêu một địa điểm cụ thể NHƯNG không resolve được vùng/tỉnh → tra web để liệt kê.
-      const placeRaw = this.extractPlaceCandidate(q);
-      const candidate = this.removeVietnameseTones(placeRaw);
-      const placeUnresolved = !regionInfo && candidate.length >= 4 && !this.isGenericPlaceWord(candidate);
-      // Hỏi món ăn: tra web khi DB KHÔNG có đặc sản, HOẶC user muốn THÊM (còn/khác/nữa) ngoài
-      // danh sách DB (vd "còn món nào nữa không").
-      const isFood = this.isFoodQuestion(q);
-      const wantsMore = /\b(con|them|khac|nua|ngoai ra)\b/.test(nq);
-      const foodNeedsWeb = isFood && (!specialtiesList || wantsMore);
-      // Catch-all: câu hỏi YES/NO / chi tiết trong ngữ cảnh 1 tỉnh, KHÔNG phải hỏi điểm đến/
-      // lịch trình/món ăn → DB không lưu loại chi tiết này (free, an toàn, đi lại...) → tra web.
-      const isQuestion = /\?|không|hông|\bko\b|chưa|nhỉ|hả/.test(q) || /\bkhong\b|\bhong\b/.test(nq);
-      const isDestOrItin = detectItineraryQuery(messages) || /co gi|gi choi|di dau|diem den|nen di|choi gi|tham quan|ngam canh/.test(nq);
-      const detailFollowup = !!regionInfo && isQuestion && !isDestOrItin && !isFood;
-      const shouldSearch = !isTourSearch && (isFactual || placeUnresolved || foodNeedsWeb || detailFollowup);
 
-      if (shouldSearch) {
-        // Tinh chỉnh truy vấn theo loại câu hỏi để lấy đúng thông tin thực tế.
-        const loc = regionInfo?.province || regionInfo?.region || '';
-        let searchQuery;
-        if (foodNeedsWeb) {
-          searchQuery = loc ? `đặc sản ${loc} ăn món gì ngon nổi tiếng` : lastUserMsg.content;
-        } else if (placeUnresolved && !isFactual) {
-          searchQuery = `${placeRaw} du lịch giá vé giờ mở cửa địa chỉ`;
-        } else if (loc) {
-          // Câu hỏi chi tiết trong ngữ cảnh 1 tỉnh → kèm tên tỉnh để Google ra đúng nơi
-          // (vd "biển ở đây tắm free hông" → "biển ở đây tắm free hông vũng tàu").
-          searchQuery = `${lastUserMsg.content} ${loc}`;
-        } else {
-          searchQuery = lastUserMsg.content;
-        }
-        console.log(`[AI] Web search triggered (factual=${isFactual}, placeUnresolved=${placeUnresolved}) for: "${searchQuery.slice(0, 70)}"`);
-        let webResults = null;
+      // ── ƯU TIÊN: hỏi QUÁN ĂN / NHÀ HÀNG / KHÁCH SẠN / CAFE cụ thể → Google Local ──
+      // DB chỉ có điểm tham quan (không có quán ăn/khách sạn) nên trước đây model đành trả
+      // "không có trong hệ thống" rồi tư vấn chung chung. Giờ tra Google Local để đưa TÊN
+      // + ⭐đánh giá + địa chỉ thật của cơ sở, model chỉ trình bày lại (không bịa).
+      // GATE: bỏ qua nhánh venue nếu đang TÌM tour hoặc DỰNG LỊCH TRÌNH — nếu không, câu
+      // "lịch trình 3 ngày Nha Trang có hải sản" bị isVenueQuery ('hai san') cướp sang tìm quán.
+      let venueHandled = false;
+      if (!isTourSearch && !detectItineraryQuery(messages) && this.isVenueQuery(q)) {
+        // Giữ NGUYÊN câu người dùng (chứa tiêu chí rẻ/ngon/gần/mắc/cao cấp...) + kèm địa danh
+        // ngữ cảnh nếu câu CHƯA nhắc (vd follow-up "chọn quán rẻ" sau khi đã nói Nha Trang).
+        const venueQuery = loc && !nq.includes(this.removeVietnameseTones(loc)) ? `${q} ${loc}` : q;
+        console.log(`[AI] Venue search for: "${venueQuery.slice(0, 70)}"`);
+        let venues = null;
         try {
-          webResults = await searchService.webSearch(searchQuery);
+          venues = await searchService.searchVenues(venueQuery);
         } catch (e) {
-          console.warn('[AI] Web search error:', e.message);
+          console.warn('[AI] Venue search error:', e.message);
         }
-        if (webResults) {
-          systemPrompt += `\n\n[KẾT QUẢ TÌM KIẾM WEB - dùng để trả lời CHÍNH XÁC câu hỏi nằm ngoài dữ liệu hệ thống]\n${webResults}\n\nHƯỚNG DẪN: Trả lời dựa trên các kết quả tìm kiếm web ở trên (thông tin thực tế từ Google), trích nguồn (link) khi phù hợp. Nếu kết quả vẫn chưa đủ chắc chắn, hãy nói rõ "Mình chưa tìm thấy thông tin chắc chắn về vấn đề này" — TUYỆT ĐỐI KHÔNG bịa.`;
+        venueHandled = true; // đã nhận ý định "tìm quán" → không rơi xuống nhánh web-search món ăn
+        if (venues) {
+          systemPrompt += `\n\n[ĐỊA ĐIỂM THỰC TỪ GOOGLE - quán ăn/nhà hàng/khách sạn/cafe... trả lời câu hỏi "quán nào"]\n${venues}\n\nHƯỚNG DẪN: Người dùng đang hỏi địa điểm ăn uống/lưu trú CỤ THỂ. Hãy giới thiệu các cơ sở ở trên (thông tin thật từ Google Maps): nêu tên, ⭐đánh giá, mức giá, địa chỉ; sắp xếp/ưu tiên theo tiêu chí người dùng nêu (rẻ/ngon/gần/cao cấp/2 người ~1 triệu...). Có thể kèm link. TUYỆT ĐỐI KHÔNG bịa tên quán ngoài danh sách; nếu chưa khớp tiêu chí thì nói rõ và tư vấn cách chọn. Nhắc ngắn rằng giá/đánh giá có thể thay đổi, nên xác nhận trước khi đến.`;
         } else {
-          systemPrompt += `\n\n[LƯU Ý] Câu hỏi này nằm ngoài dữ liệu hệ thống và tìm kiếm web không trả về kết quả. Nếu không chắc chắn, hãy nói rõ bạn chưa có thông tin chính xác và đề nghị người dùng kiểm tra nguồn chính thống — TUYỆT ĐỐI KHÔNG bịa.`;
+          systemPrompt += `\n\n[LƯU Ý] Người dùng hỏi địa điểm ăn uống/lưu trú nhưng tìm kiếm Google không có kết quả. Hãy tư vấn TIÊU CHÍ chọn quán (khu vực, tầm giá, loại món, hỏi giá trước khi gọi) — TUYỆT ĐỐI KHÔNG bịa tên quán cụ thể.`;
+        }
+      }
+
+      // ── Web search fallback: câu hỏi NGOÀI dữ liệu hệ thống → tra Google, KHÔNG bịa ──
+      // Kích hoạt khi: (a) hỏi sự kiện/giá/giờ... cụ thể, HOẶC (b) DB không có gì để trả lời.
+      if (!venueHandled) {
+        const isFactual = this.isFactualQuery(q);
+        // User nêu một địa điểm cụ thể NHƯNG không resolve được vùng/tỉnh → tra web để liệt kê.
+        const placeRaw = this.extractPlaceCandidate(q);
+        const candidate = this.removeVietnameseTones(placeRaw);
+        const placeUnresolved = !regionInfo && candidate.length >= 4 && !this.isGenericPlaceWord(candidate);
+        // Hỏi món ăn: tra web khi DB KHÔNG có đặc sản, HOẶC user muốn THÊM (còn/khác/nữa) ngoài
+        // danh sách DB (vd "còn món nào nữa không").
+        const isFood = this.isFoodQuestion(q);
+        const wantsMore = /\b(con|them|khac|nua|ngoai ra)\b/.test(nq);
+        const foodNeedsWeb = isFood && (!specialtiesList || wantsMore);
+        // Catch-all: câu hỏi YES/NO / chi tiết trong ngữ cảnh 1 tỉnh, KHÔNG phải hỏi điểm đến/
+        // lịch trình/món ăn → DB không lưu loại chi tiết này (free, an toàn, đi lại...) → tra web.
+        const isQuestion = /\?|không|hông|\bko\b|chưa|nhỉ|hả/.test(q) || /\bkhong\b|\bhong\b/.test(nq);
+        const isDestOrItin = detectItineraryQuery(messages) || /co gi|gi choi|di dau|diem den|nen di|choi gi|tham quan|ngam canh/.test(nq);
+        const detailFollowup = !!regionInfo && isQuestion && !isDestOrItin && !isFood;
+        const shouldSearch = !isTourSearch && (isFactual || placeUnresolved || foodNeedsWeb || detailFollowup);
+
+        if (shouldSearch) {
+          // Tinh chỉnh truy vấn theo loại câu hỏi để lấy đúng thông tin thực tế.
+          let searchQuery;
+          if (foodNeedsWeb) {
+            searchQuery = loc ? `đặc sản ${loc} ăn món gì ngon nổi tiếng` : lastUserMsg.content;
+          } else if (placeUnresolved && !isFactual) {
+            searchQuery = `${placeRaw} du lịch giá vé giờ mở cửa địa chỉ`;
+          } else if (loc) {
+            // Câu hỏi chi tiết trong ngữ cảnh 1 tỉnh → kèm tên tỉnh để Google ra đúng nơi
+            // (vd "biển ở đây tắm free hông" → "biển ở đây tắm free hông vũng tàu").
+            searchQuery = `${lastUserMsg.content} ${loc}`;
+          } else {
+            searchQuery = lastUserMsg.content;
+          }
+          console.log(`[AI] Web search triggered (factual=${isFactual}, placeUnresolved=${placeUnresolved}) for: "${searchQuery.slice(0, 70)}"`);
+          let webResults = null;
+          try {
+            webResults = await searchService.webSearch(searchQuery);
+          } catch (e) {
+            console.warn('[AI] Web search error:', e.message);
+          }
+          if (webResults) {
+            systemPrompt += `\n\n[KẾT QUẢ TÌM KIẾM WEB - dùng để trả lời CHÍNH XÁC câu hỏi nằm ngoài dữ liệu hệ thống]\n${webResults}\n\nHƯỚNG DẪN: Trả lời dựa trên các kết quả tìm kiếm web ở trên (thông tin thực tế từ Google), trích nguồn (link) khi phù hợp. Nếu kết quả vẫn chưa đủ chắc chắn, hãy nói rõ "Mình chưa tìm thấy thông tin chắc chắn về vấn đề này" — TUYỆT ĐỐI KHÔNG bịa.`;
+          } else {
+            systemPrompt += `\n\n[LƯU Ý] Câu hỏi này nằm ngoài dữ liệu hệ thống và tìm kiếm web không trả về kết quả. Nếu không chắc chắn, hãy nói rõ bạn chưa có thông tin chính xác và đề nghị người dùng kiểm tra nguồn chính thống — TUYỆT ĐỐI KHÔNG bịa.`;
+          }
         }
       }
     }

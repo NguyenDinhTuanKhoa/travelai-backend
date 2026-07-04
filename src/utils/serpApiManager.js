@@ -35,51 +35,69 @@ class SerpApiManager {
    * @param {Object} params Tham số truy vấn (e.g., { engine: 'google_maps', q: 'khách sạn Bến Tre' })
    * @returns {Object} Dữ liệu JSON trả về từ SerpApi
    */
-  async fetchWithRotation(params) {
-    let attempts = 0;
-    const maxAttempts = this.keys.length;
+  // Phân loại lỗi RIÊNG 1 key (hết credit / key sai / rate-limit) → nên xoay sang key khác.
+  // Lỗi hạ tầng (network/timeout/5xx) xoay key vô ích → để caller xử lý.
+  isKeyError(error) {
+    const errorMsg = error.response?.data?.error || error.message || '';
+    const status = error.response?.status;
+    return (
+      errorMsg.includes('Account is out of credits') ||
+      errorMsg.includes('run out of searches') ||
+      errorMsg.includes('Invalid API key') ||
+      errorMsg.includes('is not included in the list') ||
+      status === 401 || status === 429 || status === 400
+    );
+  }
 
-    while (attempts < maxAttempts) {
-      const currentKey = this.getCurrentKey();
-      
+  /**
+   * Gọi SerpApi với XOAY VÒNG TRÒN key: bắt đầu từ key đang dùng, gặp lỗi HẾT QUOTA/CHẶN thì
+   * sang key kế (modulo, nên LUÔN thử đủ n key dù currentIndex đang ở giữa danh sách — khác bản
+   * cũ chỉ xoay TIẾN, dễ báo "cạn hết key" oan khi chưa thử các key phía trước). Key nào chạy
+   * được thì ghim currentIndex vào đó để request sau bắt đầu thẳng từ key sống.
+   * @param {Object} params Tham số truy vấn (e.g., { engine: 'google_maps', q: 'khách sạn Bến Tre' })
+   * @returns {Object} Dữ liệu JSON trả về từ SerpApi
+   */
+  async fetchWithRotation(params) {
+    const n = this.keys.length;
+    if (n === 0) throw new Error('Không có SerpApi Key nào được cấu hình.');
+
+    let lastErr;
+    for (let attempt = 0; attempt < n; attempt++) {
+      const idx = (this.currentIndex + attempt) % n;
+      const currentKey = this.keys[idx];
+
       try {
         const response = await axios.get('https://serpapi.com/search', {
-          params: {
-            ...params,
-            api_key: currentKey
-          }
+          params: { ...params, api_key: currentKey }
         });
 
-        // Kiểm tra xem API có thông báo lỗi trong body không (đôi khi HTTP 200 nhưng body chứa error)
+        // Đôi khi HTTP 200 nhưng body chứa error (vd hết credit) → coi như lỗi để xoay key
         if (response.data && response.data.error) {
           throw new Error(response.data.error);
         }
 
+        this.currentIndex = idx; // key này chạy được → ghim để các request sau bắt đầu từ đây
         return response.data;
 
       } catch (error) {
+        lastErr = error;
         const errorMsg = error.response?.data?.error || error.message;
-        console.error(`❌ Lỗi với Key ${currentKey.substring(0, 10)}...: ${errorMsg}`);
+        console.error(`❌ Lỗi với Key ${idx + 1}/${n} (${currentKey.substring(0, 10)}...): ${errorMsg}`);
 
-        // Nếu lỗi là do hết hạn mức, quá tải, key sai, hoặc lỗi 400
-        if (
-          errorMsg.includes('Account is out of credits') || 
-          errorMsg.includes('Invalid API key') ||
-          errorMsg.includes('is not included in the list') ||
-          error.response?.status === 429 ||
-          error.response?.status === 400
-        ) {
-          console.log('⚠️ Đang thực hiện xoay vòng API Key...');
-          this.rotateKey();
-          attempts++;
-        } else {
-          // Lỗi khác (vd: sai cú pháp query) thì ném ra ngoài, không xoay vòng
-          throw error;
+        if (this.isKeyError(error)) {
+          if (attempt < n - 1) {
+            console.log(`🔄 Xoay sang key kế tiếp (đã thử ${attempt + 1}/${n})...`);
+            continue;
+          }
+          // Đã thử hết n key mà đều lỗi key → cạn thật
+          throw new Error(`Tất cả ${n} SerpApi key đều hết hạn mức hoặc bị chặn. Vui lòng thêm key mới!`);
         }
+        // Lỗi hạ tầng (network/timeout/sai query) → xoay key vô ích, ném thẳng
+        throw error;
       }
     }
 
-    throw new Error('Đã thử tất cả các Keys nhưng không thành công.');
+    throw lastErr || new Error('Đã thử tất cả các Keys nhưng không thành công.');
   }
 }
 
