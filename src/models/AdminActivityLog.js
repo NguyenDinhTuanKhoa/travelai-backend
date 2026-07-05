@@ -9,7 +9,7 @@ const adminActivityLogSchema = new mongoose.Schema({
   },
   targetModel: {
     type: String,
-    enum: ['User', 'Destination', 'Review', 'Itinerary', 'ChatHistory'],
+    enum: ['User', 'Destination', 'Review', 'Itinerary', 'ChatHistory', 'ProvinceSpecialty'],
     required: true,
   },
   targetId: { type: mongoose.Schema.Types.ObjectId },

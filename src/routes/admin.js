@@ -6,6 +6,7 @@ const Review = require('../models/Review');
 const Itinerary = require('../models/Itinerary');
 const Tour = require('../models/Tour');
 const ChatHistory = require('../models/ChatHistory');
+const ProvinceSpecialty = require('../models/ProvinceSpecialty');
 const AdminActivityLog = require('../models/AdminActivityLog');
 const aiService = require('../services/aiService');
 const { fillTourImages } = require('../utils/tourImages');
@@ -362,6 +363,124 @@ router.delete('/destinations/:id', async (req, res) => {
       targetLabel: destination.name,
     });
     res.json({ message: 'Destination deleted' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// ============================================================
+// SPECIALTIES MANAGEMENT (Đặc sản / Món ăn theo tỉnh)
+// ============================================================
+
+// Build search text từ mảng món ăn / đặc sản
+const buildSpecialtyText = (items) =>
+  (Array.isArray(items) ? items : [])
+    .map((i) => i?.name)
+    .filter(Boolean)
+    .join(', ');
+
+// Chuẩn hóa payload trước khi lưu: sinh localDishesText / souvenirsText
+const normalizeSpecialtyBody = (body = {}) => {
+  const data = { ...body };
+  if (Array.isArray(data.localDishes)) data.localDishesText = buildSpecialtyText(data.localDishes);
+  if (Array.isArray(data.souvenirs)) data.souvenirsText = buildSpecialtyText(data.souvenirs);
+  return data;
+};
+
+router.get('/specialties', async (req, res) => {
+  try {
+    const { page = 1, limit = 10, search, region } = req.query;
+    const query = {};
+    if (search) {
+      query.$or = [
+        { province: { $regex: search, $options: 'i' } },
+        { localDishesText: { $regex: search, $options: 'i' } },
+        { souvenirsText: { $regex: search, $options: 'i' } },
+      ];
+    }
+    if (region && region !== 'all') query.region = region;
+
+    const specialties = await ProvinceSpecialty.find(query)
+      .sort({ stt: 1 })
+      .limit(limit * 1)
+      .skip((page - 1) * limit);
+
+    const total = await ProvinceSpecialty.countDocuments(query);
+    res.json({ specialties, total, totalPages: Math.ceil(total / limit) });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+router.post('/specialties', async (req, res) => {
+  try {
+    const specialty = await ProvinceSpecialty.create(normalizeSpecialtyBody(req.body));
+    logActivity(req, {
+      action: 'create',
+      targetModel: 'ProvinceSpecialty',
+      targetId: specialty._id,
+      targetLabel: specialty.province,
+    });
+    res.status(201).json(specialty);
+  } catch (error) {
+    // Trùng tỉnh (unique index) → thông báo rõ ràng
+    if (error.code === 11000) {
+      return res.status(400).json({ message: 'Tỉnh/thành này đã tồn tại trong danh sách đặc sản' });
+    }
+    res.status(500).json({ message: error.message });
+  }
+});
+
+router.put('/specialties/:id', async (req, res) => {
+  try {
+    const specialty = await ProvinceSpecialty.findByIdAndUpdate(
+      req.params.id,
+      normalizeSpecialtyBody(req.body),
+      { new: true, runValidators: true }
+    );
+    if (!specialty) return res.status(404).json({ message: 'Not found' });
+    logActivity(req, {
+      action: 'update',
+      targetModel: 'ProvinceSpecialty',
+      targetId: specialty._id,
+      targetLabel: specialty.province,
+    });
+    res.json(specialty);
+  } catch (error) {
+    if (error.code === 11000) {
+      return res.status(400).json({ message: 'Tỉnh/thành này đã tồn tại trong danh sách đặc sản' });
+    }
+    res.status(500).json({ message: error.message });
+  }
+});
+
+router.delete('/specialties/bulk', async (req, res) => {
+  try {
+    const ids = toValidIds(req.body?.ids);
+    if (ids.length === 0) return res.status(400).json({ message: 'Không có id hợp lệ' });
+    const result = await ProvinceSpecialty.deleteMany({ _id: { $in: ids } });
+    logActivity(req, {
+      action: 'bulk_delete',
+      targetModel: 'ProvinceSpecialty',
+      meta: { count: result.deletedCount, ids },
+    });
+    res.json({ deletedCount: result.deletedCount });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+router.delete('/specialties/:id', async (req, res) => {
+  try {
+    const specialty = await ProvinceSpecialty.findByIdAndDelete(req.params.id);
+    if (!specialty) return res.status(404).json({ message: 'Not found' });
+    logActivity(req, {
+      action: 'delete',
+      targetModel: 'ProvinceSpecialty',
+      targetId: specialty._id,
+      targetLabel: specialty.province,
+    });
+    res.json({ message: 'Specialty deleted' });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
