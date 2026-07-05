@@ -269,6 +269,24 @@ const REGION_KEYWORDS = {
     'hà tiên', 'châu đốc', 'cù lao', 'miền tây'],
 };
 
+// Cụm chỉ VÙNG MIỀN (không phải tỉnh cụ thể) — có thể lọt vào REGION_KEYWORDS như "miền tây",
+// hoặc là bản ghi rác trong ProvinceSpecialty. Khi detect ra "tỉnh" trùng các cụm này → xử như
+// VÙNG (Bước 2: chọn tỉnh trong vùng) chứ KHÔNG khoá thành điểm đến cụ thể ở Bước 3.
+const REGION_ALIAS_WORDS = new Set([
+  'miền tây', 'miền bắc', 'miền trung', 'miền nam', 'tây nguyên', 'bắc bộ', 'trung bộ', 'nam bộ',
+  'đồng bằng sông cửu long', 'tây bắc', 'đông bắc', 'đông nam bộ',
+]);
+
+// Viết tắt / biệt danh tỉnh phổ biến mà REGION_KEYWORDS KHÔNG có (vd "HCM", "TPHCM", "BR-VT").
+// Chuẩn hoá về TÊN ĐẦY ĐỦ để detectRegionFromQuery nhận ra → bật form đúng thay vì rơi null.
+// pats đã bỏ dấu/thường hoá (khớp trên noTonesQuery). CHỈ thêm cụm ÍT MƠ HỒ — tránh biệt danh
+// dễ đụng ("cố đô", "phố núi", "đảo ngọc", "tây đô"≈"tây đó") gây khoá sai tỉnh.
+const PROVINCE_ALIASES = [
+  { pats: ['thanh pho ho chi minh', 'tphcm', 'tp hcm', 'tp.hcm', 'hcm', 'sai gon', 'saigon'], name: 'Hồ Chí Minh', region: 'Miền Nam' },
+  { pats: ['ba ria vung tau', 'ba ria - vung tau', 'br-vt', 'brvt', 'br vt'], name: 'Bà Rịa - Vũng Tàu', region: 'Miền Nam' },
+  { pats: ['xu nghe'], name: 'Nghệ An', region: 'Miền Trung' },
+];
+
 // Detect vùng/tỉnh từ query người dùng
 // Dịch chuyển detectRegionFromQuery vào trong class AIService để gọi hàm async
 
@@ -503,6 +521,12 @@ class AIService {
     const lowerQuery = query.toLowerCase();
     const noTonesQuery = this.removeVietnameseTones(query);
     
+    // Viết tắt / biệt danh tỉnh (không nằm trong REGION_KEYWORDS) → chuẩn hoá về tên đầy đủ.
+    // Đặt TRƯỚC khớp thường để "hcm"/"tphcm" không rơi vào nhánh null.
+    for (const a of PROVINCE_ALIASES) {
+      if (a.pats.some(p => noTonesQuery.includes(p))) return { region: a.region, province: a.name };
+    }
+
     // Tìm tỉnh cụ thể trước
     const allProvinces = Object.values(REGION_KEYWORDS).flat();
     let matchedProvince = allProvinces.find(p => lowerQuery.includes(p) || noTonesQuery.includes(this.removeVietnameseTones(p)));
@@ -527,6 +551,8 @@ class AIService {
     if (lowerQuery.includes('miền trung') || lowerQuery.includes('trung bộ')) return { region: 'Miền Trung', province: null };
     if (lowerQuery.includes('miền nam') || lowerQuery.includes('nam bộ') || lowerQuery.includes('miền tây') || lowerQuery.includes('đồng bằng sông cửu long')) return { region: 'Miền Nam', province: null };
     if (lowerQuery.includes('tây nguyên')) return { region: 'Tây Nguyên', province: null };
+    // Tiểu vùng phía Bắc (chưa phải tỉnh cụ thể) → coi là Miền Bắc để đi Bước 2 chọn tỉnh.
+    if (lowerQuery.includes('tây bắc') || lowerQuery.includes('đông bắc')) return { region: 'Miền Bắc', province: null };
 
     // 3) Khớp tên địa danh trong DB — ĐẦY ĐỦ (tên nằm trong câu) HOẶC MỘT PHẦN (tên chứa cụm
     //    địa điểm, vd "suối tiên" → "Khu Du Lịch Suối Tiên"). CHỈ nhận khi KHÔNG mơ hồ: mọi địa
@@ -663,13 +689,60 @@ class AIService {
 
     // 2. Xác định địa điểm tốt nhất trong ~4 tin user gần nhất (đa lượt)
     const recentUserMsgs = messages.filter(m => m.role === 'user').slice(-4);
+    let knownProvince = null;
     let knownRegion = null;
     for (const m of recentUserMsgs) {
-      // Có tỉnh cụ thể (kể cả tỉnh ngoài REGION_KEYWORDS) → đủ thông tin → không hỏi nữa
-      if (await this.detectProvinceFromText(m.content)) return null;
       const r = await this.detectRegionFromQuery(m.content);
-      if (r?.province) return null;          // detectRegionFromQuery bắt được tỉnh
-      if (r?.region) knownRegion = r.region;  // chỉ mới biết tới vùng
+      // "province" trả về có thể thực chất là ALIAS VÙNG (vd "miền tây" nằm trong REGION_KEYWORDS)
+      // → xử như VÙNG (Bước 2), đừng khoá thành điểm đến cụ thể ở Bước 3.
+      const provinceIsAlias = r?.province && REGION_ALIAS_WORDS.has(r.province.toLowerCase());
+      if (r?.province && !provinceIsAlias) { knownProvince = knownProvince || r.province; continue; } // tỉnh thật
+      if (r?.region) { knownRegion = r.region; continue; }  // vùng thuần HOẶC province-là-alias-vùng
+      if (!knownProvince) {
+        const p = await this.detectProvinceFromText(m.content); // tỉnh cụ thể (kể cả ngoài REGION_KEYWORDS)
+        if (p && !REGION_ALIAS_WORDS.has(p.toLowerCase())) knownProvince = p; // né bản ghi rác "miền tây"
+      }
+    }
+
+    // 2b. BƯỚC 3 — đã biết TỈNH cụ thể. Trước đây coi là "đủ thông tin" → tạo lịch trình luôn
+    //     (model tự đoán 3N2Đ rồi hỏi thêm bằng lời). Giờ nếu CHƯA nêu số ngày → hỏi nốt chi
+    //     tiết rồi mới dựng. Tỉnh được KHOÁ qua defaults.location (compose() tự chèn "đi du lịch
+    //     <tỉnh>") nên KHÔNG render lại field địa điểm. Đã nêu ngày (vd "3 ngày 2 đêm") → vẫn
+    //     tạo luôn để khỏi hỏi thừa — cũng là chốt chặn chống lặp: câu compose trả về LUÔN kèm
+    //     số ngày (field bắt buộc) nên lần sau rơi vào nhánh này và return null.
+    if (knownProvince) {
+      if (this.extractDaysFromText(lastUserMsg.content)) return null;
+      const budgetMentioned = this.extractBudgetFromText(lastUserMsg.content);
+      const peopleMentioned = this.extractPeopleFromText(lastUserMsg.content);
+      const fields = [{ ...CLARIFY_FIELDS.days, required: true }]; // số ngày là thông tin cốt lõi → bắt buộc
+      if (!budgetMentioned) fields.push(CLARIFY_FIELDS.budget);
+      if (!peopleMentioned) fields.push(CLARIFY_FIELDS.people);
+      fields.push(CLARIFY_FIELDS.interests);
+
+      // Tên tỉnh có thể lấy từ REGION_KEYWORDS (viết thường) → title-case cho hiển thị & câu compose.
+      const displayProvince = knownProvince.split(/\s+/).map(w => (w ? w[0].toUpperCase() + w.slice(1) : w)).join(' ');
+      // Khoá tỉnh + gộp default theo loại hình (trăng mật → cặp đôi...) nếu có, chỉ giữ key ứng
+      // với field đang hiển thị (default cho field ẩn sẽ rò vào câu compose).
+      const defaults = { location: displayProvince };
+      if (tripType) {
+        const fieldKeys = new Set(fields.map(f => f.key));
+        const merged = { ...(tripType.defaults || {}), interests: tripType.interests };
+        for (const [k, v] of Object.entries(merged)) {
+          if (fieldKeys.has(k)) defaults[k] = v;
+        }
+      }
+      const intro = tripType
+        ? tripType.intro
+        : `Đi ${displayProvince} hay đấy! 🎒 Cho mình xin vài thông tin để lên lịch trình chuẩn hơn nhé 👇`;
+      const block = JSON.stringify({
+        type: 'clarification',
+        step: 'details',
+        tripType: tripType?.type || null,
+        title: `Lên lịch trình ${displayProvince} — mình cần thêm chút thông tin nhé!`,
+        fields,
+        ...(Object.keys(defaults).length ? { defaults } : {}),
+      });
+      return `${intro}\n\n\`\`\`json_form\n${block}\n\`\`\``;
     }
 
     // 3. BƯỚC 2 — đã có vùng nhưng chưa có tỉnh → hỏi chọn tỉnh trong vùng
@@ -925,6 +998,11 @@ class AIService {
     // "Trà Vinh còn không") → AI chỉ liệt kê tên tỉnh/thành chứ không gợi ý điểm đến.
     // Bỏ qua trích card để tránh hiện "Điểm đến được nhắc đến" sai ngữ cảnh.
     if (question && this.isGeneralKnowledgeQuery(question)) return [];
+    // AI HỎI NGƯỢC để chọn địa phương ("...ở tỉnh/thành nào?", "khu vực nào?") → đây mới là
+    // bước LÀM RÕ bằng văn xuôi, chưa gợi ý điểm đến cụ thể (chỉ liệt kê tỉnh cho user chọn).
+    // Nếu trích sẽ vớ phải record cấp tỉnh (vd placeholder "Vĩnh Long" rating 0) tình cờ trùng
+    // 1 tỉnh trong danh sách → hiện 1 card lẻ, sai ngữ cảnh. Bỏ qua tới khi user chốt tỉnh.
+    if (this.isLocationChoicePrompt(text)) return [];
     const docs = await this.getDestinationsLite();
     const noTonesText = this.removeVietnameseTones(text);
     // Cặp song song (bỏ dấu ‖ giữ dấu) để khớp tên địa danh CÓ XÁC THỰC DẤU — chặn kiểu
@@ -1192,6 +1270,18 @@ class AIService {
       'quoc khanh', 'dan toc', 'ngon ngu', 'tien te', 'gdp', 'co tu khi nao', 'tu nam',
     ];
     return generalKnowledge.some(k => noTones.includes(k));
+  }
+
+  // ── AI hỏi ngược chọn địa phương? (disambiguation bằng văn xuôi) ─────────────
+  // Vd "Bạn muốn tìm bánh xèo ở tỉnh/thành nào?" — model liệt kê nhiều tỉnh cho user chọn
+  // thay vì gợi ý 1 điểm đến. Đây KHÔNG phải câu trả lời có điểm đến → không trích card
+  // (kẻo dính record cấp tỉnh trùng tên 1 tỉnh trong danh sách). Bỏ dấu để né vướng \w với
+  // ký tự tiếng Việt; đòi dấu "?" NGAY SAU cụm (cùng câu, không vượt . ! ? \n) để chắc là
+  // câu hỏi chọn nơi, không phải câu kể vô tình chứa "tỉnh ... nào".
+  isLocationChoicePrompt(text) {
+    if (!text || !text.includes('?')) return false;
+    const noTones = this.removeVietnameseTones(text);
+    return /\b(?:tinh|thanh pho|thanh|khu vuc|vung|mien|dia phuong)\s*\/?\s*(?:tinh|thanh pho|thanh)?\s*nao\b[^.?!\n]{0,15}\?/.test(noTones);
   }
 
   // ── Build system prompt thông minh ─────────────────────────────────────────
