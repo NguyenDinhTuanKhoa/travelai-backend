@@ -989,6 +989,31 @@ class AIService {
     return COMMON.has(noTonesName);
   }
 
+  // Tên NHIỀU TỪ nhưng TOÀN danh từ chung/loại hình (không có lõi tên riêng), vd
+  // "Khu vui chơi", "Bãi biển", "Chợ đêm", "Nhà hàng". Đây thường là record placeholder
+  // và cực dễ false-positive: lịch trình AI luôn có cụm văn xuôi kiểu "chọn khu vui chơi",
+  // "đi dạo bãi biển" → khớp nhầm đúng cái tên chung đó dù khác tỉnh. Chỉ nên trích khi có
+  // tỉnh ngữ cảnh khớp đúng (giống chính sách của isAmbiguousShortName). Tên còn 1 token
+  // RIÊNG (vd "Bãi biển Titop", "Công viên Yên Sở") sẽ KHÔNG bị coi là chung → vẫn hiện.
+  isGenericPlaceName(noTonesName) {
+    if (!noTonesName || !noTonesName.includes(' ')) return false; // tên 1 từ đã có guard riêng
+    const GENERIC = new Set([
+      'khu', 'vui', 'choi', 'giai', 'tri',        // khu vui chơi, giải trí
+      'bai', 'bien',                              // bãi biển
+      'cong', 'vien',                             // công viên
+      'trung', 'tam',                             // trung tâm
+      'thuong', 'mai',                            // thương mại
+      'sieu', 'thi',                              // siêu thị
+      'cho', 'dem',                               // chợ, chợ đêm
+      'nha', 'hang',                              // nhà hàng
+      'quan', 'an', 'uong', 'ca', 'phe',          // quán ăn, cà phê
+      'du', 'lich', 'diem', 'thang', 'canh',      // du lịch, điểm, thắng cảnh
+      'khach', 'san',                             // khách sạn
+      'resort', 'homestay', 'hostel', 'hotel',
+    ]);
+    return noTonesName.split(/\s+/).every(tok => GENERIC.has(tok));
+  }
+
   // ── Trích "điểm đến được nhắc đến" trong 1 đoạn text (cho card AI chat) ──────
   // Khớp KHÔNG phân biệt hoa/dấu, cả tên đầy đủ lẫn lõi tên; lọc theo TỈNH NGỮ CẢNH
   // (có alias TP.HCM/Sài Gòn...) để KHÔNG hiện card sai tỉnh. Trả về dạng card frontend.
@@ -1049,10 +1074,16 @@ class AIService {
     //    HOẶC lõi tên (≥5 ký tự, KHÔNG phải tên tỉnh). Tên 1 TỪ trùng từ thông dụng tiếng
     //    Việt (Thành/Một/Mộc/Gió...) bị loại trừ trừ khi có tỉnh ngữ cảnh khớp đúng — vì
     //    chúng cực dễ false-positive (vd "thành phố" → khớp nhầm địa điểm tên "Thành").
+    const fullNameMatchIds = new Set();
     const directMatches = docs.filter(d => {
       if (!d._nn || d._nn.length < 4) return false;
-      if (this.isAmbiguousShortName(d._nn) && !ctxCities.has(d.location?.city)) return false;
-      if (this.containsWordToneAware(textPair, d._nn, d._nnT)) return true;
+      if ((this.isAmbiguousShortName(d._nn) || this.isGenericPlaceName(d._nn)) && !ctxCities.has(d.location?.city)) return false;
+      // Khớp TÊN ĐẦY ĐỦ (proper name xuất hiện y nguyên) → chính xác cao, đánh dấu để bước 3
+      // KHÔNG loại nhầm dù tỉnh khác ngữ cảnh (vd lịch trình Hạ Long có câu "đi từ Hà Nội" →
+      // "Hà Nội" thành ngữ cảnh, nhưng "Vịnh Hạ Long" vẫn phải hiện vì được nhắc đích danh).
+      if (this.containsWordToneAware(textPair, d._nn, d._nnT)) { fullNameMatchIds.add(String(d._id)); return true; }
+      // Khớp theo LÕI tên (bỏ tiền tố loại hình) — lỏng hơn, dễ trùng tên chéo tỉnh → vẫn siết
+      // theo tỉnh ngữ cảnh ở bước 3.
       return d._core.length >= 5 && !cityNormSet.has(d._core) &&
         this.containsWordToneAware(textPair, d._core, d._coreT);
     });
@@ -1064,7 +1095,9 @@ class AIService {
       .filter(p => p.length >= 5 && !cityNormSet.has(p)))];
 
     // 3) Chọn kết quả:
-    //  - Có tỉnh ngữ cảnh → CHỈ giữ địa danh đúng tỉnh (khớp trực tiếp + mở rộng theo cụm).
+    //  - Có tỉnh ngữ cảnh → giữ khớp TÊN ĐẦY ĐỦ (dù tỉnh khác, vì được nhắc đích danh) + khớp
+    //    theo lõi/mở rộng ĐÚNG tỉnh ngữ cảnh. (Tránh việc 1 city nhắc thoáng qua — vd điểm xuất
+    //    phát "từ Hà Nội" — nuốt mất điểm đến chính có tên riêng rõ ràng.)
     //  - Không có ngữ cảnh → giữ các khớp trực tiếp (best-effort, có thể gồm nhiều tỉnh).
     let result;
     if (ctxCities.size > 0) {
@@ -1075,7 +1108,9 @@ class AIService {
         const hits = docs.filter(d => d._nn && ctxCities.has(d.location?.city) && this.containsWord(d._nn, p));
         if (hits.length <= 3) expanded.push(...hits);
       }
-      result = [...directMatches, ...expanded].filter(d => ctxCities.has(d.location?.city));
+      const kept = directMatches.filter(d =>
+        fullNameMatchIds.has(String(d._id)) || ctxCities.has(d.location?.city));
+      result = [...kept, ...expanded];
     } else {
       result = directMatches;
     }
