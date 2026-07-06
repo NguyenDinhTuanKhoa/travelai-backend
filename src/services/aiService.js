@@ -711,9 +711,13 @@ class AIService {
     //     tạo luôn để khỏi hỏi thừa — cũng là chốt chặn chống lặp: câu compose trả về LUÔN kèm
     //     số ngày (field bắt buộc) nên lần sau rơi vào nhánh này và return null.
     if (knownProvince) {
-      if (this.extractDaysFromText(lastUserMsg.content)) return null;
-      const budgetMentioned = this.extractBudgetFromText(lastUserMsg.content);
-      const peopleMentioned = this.extractPeopleFromText(lastUserMsg.content);
+      // Ngày/ngân sách/người có thể đã nêu ở LƯỢT TRƯỚC (vd chọn vùng "Miền Nam, 3 ngày, 10
+      // triệu, 2 người, thích biển" rồi mới chốt tỉnh ở lượt sau) → QUÉT các tin user gần đây,
+      // KHÔNG chỉ nhìn tin cuối, kẻo hỏi lại thông tin đã có → vòng lặp form. Đã nêu số ngày ở
+      // bất kỳ lượt gần đây → đủ cốt lõi, để model tự dựng lịch trình từ toàn bộ hội thoại.
+      if (recentUserMsgs.some(m => this.extractDaysFromText(m.content))) return null;
+      const budgetMentioned = recentUserMsgs.some(m => this.extractBudgetFromText(m.content));
+      const peopleMentioned = recentUserMsgs.some(m => this.extractPeopleFromText(m.content));
       const fields = [{ ...CLARIFY_FIELDS.days, required: true }]; // số ngày là thông tin cốt lõi → bắt buộc
       if (!budgetMentioned) fields.push(CLARIFY_FIELDS.budget);
       if (!peopleMentioned) fields.push(CLARIFY_FIELDS.people);
