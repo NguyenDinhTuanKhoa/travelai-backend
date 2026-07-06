@@ -7,6 +7,7 @@ const routingService = require('./routingService');
 const searchService = require('./searchService');
 const serperManager = require('../utils/serperManager');
 const serpApiManager = require('../utils/serpApiManager');
+const geocodingService = require('./geocodingService');
 const { MERGER_CONTEXT_BLOCK, RESTRUCTURED_NAMES, MERGER_KEYWORDS } = require('../data/provinceMergers');
 
 const opencodeClient = new OpenAI({
@@ -259,8 +260,11 @@ const TRIP_TYPES = [
 // detectNearbyQuery() yêu cầu CÓ token khoảng cách ("gần tôi"...) LẪN 1 loại địa điểm dưới đây.
 // `category` khớp enum Destination.category; `label`/`query` dùng cho intro & truy vấn Serper/SerpApi.
 // THỨ TỰ: loại cụ thể trước; keyword đã bỏ dấu, khớp theo ranh giới từ (containsWord).
-const NEARBY_PROXIMITY = ['gan toi', 'gan day', 'gan nhat', 'quanh day', 'quanh toi',
-  'xung quanh', 'cho toi', 'gan cho toi', 'gan khu vuc', 'lan can', 'o gan'];
+// Gồm biến thể đại từ ngôi 1 thân mật/miền Nam: tôi / tui / mình / tớ (đã bỏ dấu).
+const NEARBY_PROXIMITY = ['gan toi', 'gan tui', 'gan minh', 'gan to', 'gan day', 'gan nhat',
+  'quanh day', 'quanh toi', 'quanh tui', 'quanh minh', 'xung quanh',
+  'cho toi', 'cho tui', 'cho minh', 'gan cho toi', 'gan cho tui', 'gan cho minh',
+  'gan khu vuc', 'gan vi tri', 'lan can', 'o gan', 'khu vuc nay'];
 const NEARBY_TYPES = [
   { category: 'cafe', label: 'quán cà phê', query: 'quán cà phê',
     keywords: ['ca phe', 'cafe', 'coffee', 'quan nuoc'] },
@@ -704,17 +708,23 @@ class AIService {
       const seenNames = new Set(items.map(i => this.removeVietnameseTones(i.name)));
       const isDup = (name, c) => seenNames.has(this.removeVietnameseTones(name)) ||
         items.some(i => i.location?.coordinates && this.haversineKm(i.location.coordinates, c) < 0.15);
-      const ll = `@${lat},${lng},15z`;
+
+      // QUAN TRỌNG: Serper/SerpApi KHÔNG lọc theo toạ độ (tham số ll bị phớt lờ → trả kết quả
+      // mặc định ở Hà Nội). Phải REVERSE GEOCODE toạ độ → tên khu vực rồi nhét vào query `q`
+      // (vd "quán cà phê Phường Hòa Thuận, Vĩnh Long"). Haversine sau đó vẫn lọc chính xác theo
+      // GPS thật nên kể cả query hơi rộng cũng chỉ giữ đúng quán trong bán kính.
+      const geo = await geocodingService.reverseGeocode(lat, lng).catch(() => null);
+      const searchQuery = geo?.label ? `${intent.query} ${geo.label}` : intent.query;
 
       let live = [];
       try {
-        live = await this._serperNearby(intent.query, ll, lat, lng, radiusKm);
+        live = await this._serperNearby(searchQuery, lat, lng, radiusKm);
       } catch (e) {
         console.warn('[Nearby] Serper lỗi, thử SerpApi:', e.message);
       }
       if (!live.length) {
         try {
-          live = await this._serpApiNearby(intent.query, ll, lat, lng, radiusKm);
+          live = await this._serpApiNearby(searchQuery, lat, lng, radiusKm);
         } catch (e) {
           console.warn('[Nearby] SerpApi lỗi:', e.message);
         }
@@ -755,8 +765,10 @@ class AIService {
     };
   }
 
-  async _serperNearby(query, ll, lat, lng, radiusKm) {
-    const data = await serperManager.searchPlaces(query, ll);
+  // Serper /places KHÔNG lọc theo toạ độ → `query` PHẢI đã kèm địa danh (reverse geocode).
+  // Haversine lọc lại theo GPS thật nên chỉ giữ đúng quán trong bán kính.
+  async _serperNearby(query, lat, lng, radiusKm) {
+    const data = await serperManager.searchPlaces(query);
     const places = data?.places || [];
     const user = { lat, lng };
     return places
@@ -764,9 +776,11 @@ class AIService {
       .filter(Boolean);
   }
 
-  async _serpApiNearby(query, ll, lat, lng, radiusKm) {
+  // SerpApi google_maps CÓ hỗ trợ `ll` (@lat,lng,zoom) thật → tự dựng từ toạ độ; query cũng
+  // kèm địa danh cho chắc. Haversine lọc lại theo GPS thật.
+  async _serpApiNearby(query, lat, lng, radiusKm) {
     const data = await serpApiManager.fetchWithRotation({
-      engine: 'google_maps', type: 'search', q: query, ll, hl: 'vi', gl: 'vn',
+      engine: 'google_maps', type: 'search', q: query, ll: `@${lat},${lng},15z`, hl: 'vi', gl: 'vn',
     });
     const results = data?.local_results || [];
     const user = { lat, lng };

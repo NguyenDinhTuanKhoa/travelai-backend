@@ -217,6 +217,38 @@ class GeocodingService {
   }
 
   /**
+   * REVERSE geocode: toạ độ (lat,lng) → tên khu vực để nhét vào query tìm kiếm.
+   * Dùng cho "tìm quán ... gần tôi": Serper/SerpApi KHÔNG lọc theo toạ độ, phải kèm địa danh
+   * vào query `q`. Trả { locality, province, label } — label = "phường/quận + tỉnh" để search.
+   * Cache theo lưới ~1km (làm tròn 2 chữ số thập phân) để tránh spam Nominatim.
+   * @returns {Promise<{locality:string, province:string, label:string}|null>}
+   */
+  async reverseGeocode(lat, lng) {
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+    const key = `rev:${lat.toFixed(2)},${lng.toFixed(2)}`;
+    if (this.cache.has(key)) return this.cache.get(key);
+    try {
+      const response = await axios.get(`${this.baseURL}/reverse`, {
+        params: { lat, lon: lng, format: 'json', zoom: 14, addressdetails: 1, 'accept-language': 'vi' },
+        headers: { 'User-Agent': 'TravelAI/1.0' },
+        timeout: 5000,
+      });
+      const a = response.data?.address;
+      if (!a) return null;
+      // Nominatim VN: khu vực cụ thể thường ở county/city/town/suburb; tỉnh ở state.
+      const locality = a.suburb || a.quarter || a.town || a.city || a.county || a.district || '';
+      const province = (a.state || '').replace(/^Tỉnh\s+|^Thành phố\s+/i, '').trim();
+      const label = [locality, province].filter(Boolean).join(', ') || province || locality;
+      const result = label ? { locality, province, label } : null;
+      if (result) this.cache.set(key, result);
+      return result;
+    } catch (error) {
+      console.error(`Reverse geocode error (${lat},${lng}):`, error.message);
+      return null;
+    }
+  }
+
+  /**
    * Lấy tọa độ cho nhiều địa điểm cùng lúc
    */
   async getMultipleCoordinates(locationNames) {
