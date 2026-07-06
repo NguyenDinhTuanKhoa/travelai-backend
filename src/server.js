@@ -44,7 +44,12 @@ const corsOptions = {
 // /destinations (4.6MB) giảm còn vài trăm KB → tăng tốc tải bản đồ rõ rệt.
 app.use(compression());
 app.use(cors(corsOptions));
-app.use(express.json());
+// Ảnh (avatar, cover/trạm tour...) lưu thẳng dạng data URL base64 trong JSON body — dự án
+// không có server upload riêng. Base64 phình ~33% nên body dễ vượt mặc định 100kb của
+// express.json() → PUT/POST bị 413 (frontend báo "Network error"). Nới lên 15mb cho đủ
+// nhiều ảnh trạm đã nén. urlencoded cũng nới cho đồng bộ.
+app.use(express.json({ limit: '15mb' }));
+app.use(express.urlencoded({ limit: '15mb', extended: true }));
 
 // Swagger UI
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
