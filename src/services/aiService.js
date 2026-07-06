@@ -5,6 +5,8 @@ const Destination = require('../models/Destination');
 const ProvinceSpecialty = require('../models/ProvinceSpecialty');
 const routingService = require('./routingService');
 const searchService = require('./searchService');
+const serperManager = require('../utils/serperManager');
+const serpApiManager = require('../utils/serpApiManager');
 const { MERGER_CONTEXT_BLOCK, RESTRUCTURED_NAMES, MERGER_KEYWORDS } = require('../data/provinceMergers');
 
 const opencodeClient = new OpenAI({
@@ -251,6 +253,21 @@ const TRIP_TYPES = [
   { type: 'beach', keywords: ['di bien', 'tam bien', 'ra bien', 'bai bien', 'lan bien', 'san ho', 'bien'],
     intro: '🏖️ Bạn muốn đi biển! Chọn giúp mình vài thông tin để gợi ý bãi biển hợp ý nhé 👇',
     interests: ['biển'] },
+];
+
+// ── "Gần tôi": loại địa điểm cho tìm-kiếm-theo-vị-trí ────────────────────────
+// detectNearbyQuery() yêu cầu CÓ token khoảng cách ("gần tôi"...) LẪN 1 loại địa điểm dưới đây.
+// `category` khớp enum Destination.category; `label`/`query` dùng cho intro & truy vấn Serper/SerpApi.
+// THỨ TỰ: loại cụ thể trước; keyword đã bỏ dấu, khớp theo ranh giới từ (containsWord).
+const NEARBY_PROXIMITY = ['gan toi', 'gan day', 'gan nhat', 'quanh day', 'quanh toi',
+  'xung quanh', 'cho toi', 'gan cho toi', 'gan khu vuc', 'lan can', 'o gan'];
+const NEARBY_TYPES = [
+  { category: 'cafe', label: 'quán cà phê', query: 'quán cà phê',
+    keywords: ['ca phe', 'cafe', 'coffee', 'quan nuoc'] },
+  { category: 'hotel', label: 'chỗ nghỉ', query: 'khách sạn nhà nghỉ',
+    keywords: ['nha nghi', 'khach san', 'homestay', 'resort', 'cho nghi', 'cho ngu', 'nha tro'] },
+  { category: 'restaurant', label: 'quán ăn', query: 'quán ăn nhà hàng',
+    keywords: ['quan an', 'nha hang', 'an uong', 'quan nhau', 'do an', 'quan com', 'quan pho', 'quan bun'] },
 ];
 
 // ── Mapping tỉnh/vùng miền để lọc context ──────────────────────────────────
@@ -600,6 +617,162 @@ class AIService {
       if (t.keywords.some(kw => this.containsWord(noTones, kw))) return t;
     }
     return null;
+  }
+
+  // ── "Gần tôi": nhận diện ý định tìm địa điểm THEO VỊ TRÍ ──────────────────
+  // Trả { category, label, query } hoặc null. YÊU CẦU cả token khoảng cách ("gần tôi"...)
+  // LẪN 1 loại địa điểm (quán ăn/cafe/nhà nghỉ) → không cướp câu du lịch thường như
+  // "quán ăn ngon ở Đà Nẵng" (không có "gần"). Khớp bỏ dấu theo ranh giới từ.
+  detectNearbyQuery(text) {
+    if (!text) return null;
+    const noTones = this.removeVietnameseTones(text);
+    if (!NEARBY_PROXIMITY.some(p => this.containsWord(noTones, p))) return null;
+    for (const t of NEARBY_TYPES) {
+      if (t.keywords.some(kw => this.containsWord(noTones, kw))) {
+        return { category: t.category, label: t.label, query: t.query };
+      }
+    }
+    return null;
+  }
+
+  // Khoảng cách Haversine giữa 2 toạ độ {lat,lng} → km. Model lưu {lat,lng} thường (không
+  // GeoJSON 2dsphere) nên tính tay bằng JS thay vì $near.
+  haversineKm(a, b) {
+    if (!a || !b || a.lat == null || a.lng == null || b.lat == null || b.lng == null) return Infinity;
+    const toRad = (d) => (d * Math.PI) / 180;
+    const R = 6371; // bán kính Trái Đất (km)
+    const dLat = toRad(b.lat - a.lat);
+    const dLng = toRad(b.lng - a.lng);
+    const lat1 = toRad(a.lat), lat2 = toRad(b.lat);
+    const h = Math.sin(dLat / 2) ** 2 + Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLng / 2) ** 2;
+    return 2 * R * Math.asin(Math.min(1, Math.sqrt(h)));
+  }
+
+  // Tìm địa điểm trong DB theo category, gần toạ độ user, sort theo khoảng cách tăng dần.
+  // Lọc bằng bounding-box thô trước (giảm số doc phải tính Haversine), rồi tính chính xác.
+  async findNearbyDestinations(category, lat, lng, radiusKm, limit) {
+    const latDelta = radiusKm / 111; // ~111km / 1 độ vĩ
+    const lngDelta = radiusKm / (111 * Math.cos((lat * Math.PI) / 180) || 1);
+    const docs = await Destination.find({
+      category,
+      'location.coordinates.lat': { $ne: null, $gte: lat - latDelta, $lte: lat + latDelta },
+      'location.coordinates.lng': { $ne: null, $gte: lng - lngDelta, $lte: lng + lngDelta },
+    }).select('name images location category rating priceRange description').lean();
+
+    const user = { lat, lng };
+    return docs
+      .map(d => ({ d, distanceKm: this.haversineKm(user, d.location?.coordinates) }))
+      .filter(x => x.distanceKm <= radiusKm)
+      .sort((a, b) => a.distanceKm - b.distanceKm)
+      .slice(0, limit)
+      .map(({ d, distanceKm }) => ({
+        _id: String(d._id), name: d.name, images: d.images || [], location: d.location,
+        category: d.category, rating: d.rating, priceRange: d.priceRange, description: d.description,
+        distanceKm: Math.round(distanceKm * 10) / 10,
+      }));
+  }
+
+  // ── "Gần tôi": dựng block ```json_nearby``` (tất định, KHÔNG gọi model) ──────
+  //  - Không phải câu "gần tôi"        → null (để luồng thường xử lý).
+  //  - Là "gần tôi" nhưng thiếu GPS    → block { needLocation:true } (frontend nhắc bật vị trí).
+  //  - Có GPS: DB TRƯỚC; thiếu N → bù Serper (chính) → SerpApi (dự phòng). Kết quả live KHÔNG lưu DB.
+  async buildNearbyBlock(messages, location) {
+    if (!Array.isArray(messages) || messages.length === 0) return null;
+    const lastUserMsg = [...messages].reverse().find(m => m.role === 'user');
+    if (!lastUserMsg) return null;
+    const intent = this.detectNearbyQuery(lastUserMsg.content);
+    if (!intent) return null;
+
+    const lat = Number(location?.lat), lng = Number(location?.lng);
+    const hasLoc = Number.isFinite(lat) && Number.isFinite(lng);
+    if (!hasLoc) {
+      const block = JSON.stringify({ type: 'nearby', category: intent.category, needLocation: true, items: [] });
+      return `Để tìm ${intent.label} gần bạn, mình cần biết vị trí của bạn 📍 Hãy bật quyền vị trí trong trình duyệt rồi hỏi lại giúp mình nhé!\n\n\`\`\`json_nearby\n${block}\n\`\`\``;
+    }
+
+    const N = 6;
+    let radiusKm = 8;
+    let items = await this.findNearbyDestinations(intent.category, lat, lng, radiusKm, N);
+    if (items.length < 3) { // quá ít trong 8km → nới bán kính trước khi gọi API ngoài
+      radiusKm = 15;
+      items = await this.findNearbyDestinations(intent.category, lat, lng, radiusKm, N);
+    }
+
+    // Thiếu N → bù bằng API ngoài (Serper chính, SerpApi dự phòng). Dedupe theo tên (bỏ dấu)
+    // hoặc toạ độ gần (<150m) so với item đã có.
+    if (items.length < N) {
+      const seenNames = new Set(items.map(i => this.removeVietnameseTones(i.name)));
+      const isDup = (name, c) => seenNames.has(this.removeVietnameseTones(name)) ||
+        items.some(i => i.location?.coordinates && this.haversineKm(i.location.coordinates, c) < 0.15);
+      const ll = `@${lat},${lng},15z`;
+
+      let live = [];
+      try {
+        live = await this._serperNearby(intent.query, ll, lat, lng, radiusKm);
+      } catch (e) {
+        console.warn('[Nearby] Serper lỗi, thử SerpApi:', e.message);
+      }
+      if (!live.length) {
+        try {
+          live = await this._serpApiNearby(intent.query, ll, lat, lng, radiusKm);
+        } catch (e) {
+          console.warn('[Nearby] SerpApi lỗi:', e.message);
+        }
+      }
+      for (const item of live) {
+        if (items.length >= N) break;
+        if (isDup(item.name, item.location.coordinates)) continue;
+        seenNames.add(this.removeVietnameseTones(item.name));
+        items.push(item);
+      }
+    }
+
+    items.sort((a, b) => (a.distanceKm ?? Infinity) - (b.distanceKm ?? Infinity));
+    items = items.slice(0, N);
+
+    const intro = items.length
+      ? `Đây là ${items.length} ${intent.label} gần bạn nhất mình tìm được 📍 (sắp theo khoảng cách):`
+      : `Mình chưa tìm thấy ${intent.label} nào gần vị trí của bạn 😔 Bạn thử mở rộng khu vực hoặc kiểm tra lại vị trí nhé.`;
+    const block = JSON.stringify({ type: 'nearby', category: intent.category, items });
+    return `${intro}\n\n\`\`\`json_nearby\n${block}\n\`\`\``;
+  }
+
+  // Map 1 kết quả live (Serper/SerpApi) → card shape + distanceKm + external.mapsUrl.
+  _mapLivePlace(name, plat, plng, rating, address, image, user, radiusKm) {
+    if (plat == null || plng == null) return null;
+    const distanceKm = this.haversineKm(user, { lat: plat, lng: plng });
+    if (distanceKm > radiusKm) return null;
+    return {
+      _id: null,
+      name,
+      images: image ? [image] : [],
+      location: { city: address || '', country: 'Việt Nam', coordinates: { lat: plat, lng: plng } },
+      category: 'attraction',
+      rating: rating || 0,
+      description: address || '',
+      distanceKm: Math.round(distanceKm * 10) / 10,
+      external: { mapsUrl: `https://www.google.com/maps/search/?api=1&query=${plat},${plng}` },
+    };
+  }
+
+  async _serperNearby(query, ll, lat, lng, radiusKm) {
+    const data = await serperManager.searchPlaces(query, ll);
+    const places = data?.places || [];
+    const user = { lat, lng };
+    return places
+      .map(p => this._mapLivePlace(p.title, p.latitude, p.longitude, p.rating, p.address, p.thumbnailUrl || p.imageUrl, user, radiusKm))
+      .filter(Boolean);
+  }
+
+  async _serpApiNearby(query, ll, lat, lng, radiusKm) {
+    const data = await serpApiManager.fetchWithRotation({
+      engine: 'google_maps', type: 'search', q: query, ll, hl: 'vi', gl: 'vn',
+    });
+    const results = data?.local_results || [];
+    const user = { lat, lng };
+    return results
+      .map(r => this._mapLivePlace(r.title, r.gps_coordinates?.latitude, r.gps_coordinates?.longitude, r.rating, r.address, r.thumbnail, user, radiusKm))
+      .filter(Boolean);
   }
 
   // User đã nhắc tới số ngày chưa?

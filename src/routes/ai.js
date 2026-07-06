@@ -185,7 +185,7 @@ router.post('/chat', aiGuestLimiter, async (req, res) => {
 // optionalAuth TRƯỚC streamLimiter để limiter biết user đã đăng nhập chưa (chọn quota đúng)
 router.post('/chat/stream', optionalAuth, streamLimiter, async (req, res) => {
   try {
-    const { messages, chatId } = req.body;
+    const { messages, chatId, location } = req.body;
     
     if (!messages || !Array.isArray(messages)) {
       return res.status(400).json({ message: 'Messages array is required' });
@@ -239,7 +239,7 @@ router.post('/chat/stream', optionalAuth, streamLimiter, async (req, res) => {
         // BỎ QUA nếu response là FORM LÀM RÕ (json_form): nó không gợi ý điểm đến, và lời
         // mở đầu ("gợi ý bãi biển hợp ý") dễ khớp nhầm địa danh tên "Bãi biển".
         let destIds = [];
-        if (!cleanResponse.includes('```json_form')) {
+        if (!cleanResponse.includes('```json_form') && !cleanResponse.includes('```json_nearby')) {
           try {
             // Kèm câu hỏi user để bỏ qua card khi đó là câu hỏi ngoài lề (kiến thức
             // chung / hành chính) — đồng bộ với gate ở /destinations/from-text.
@@ -264,6 +264,20 @@ router.post('/chat/stream', optionalAuth, streamLimiter, async (req, res) => {
         console.error('[Stream] Error saving to history:', saveErr.message);
       }
     };
+
+    // ── "Gần tôi" short-circuit (tất định, dùng GPS + DB + Serper/SerpApi) ──
+    // Câu "tìm quán ăn/cafe/nhà nghỉ gần tôi" → trả danh sách địa điểm gần kèm khoảng cách,
+    // KHÔNG gọi model. Chạy TRƯỚC clarification vì đặc thù hơn (có token "gần tôi").
+    const nearbyBlock = await aiService.buildNearbyBlock(messages, location);
+    if (nearbyBlock) {
+      fullResponse = nearbyBlock;
+      res.write(`data: ${JSON.stringify({ content: nearbyBlock })}\n\n`);
+      res.write('data: [DONE]\n\n');
+      res.end();
+      req.off('close', onClose);
+      await saveTurn();
+      return;
+    }
 
     // ── Clarification short-circuit (tất định, KHÔNG gọi model) ──
     // Yêu cầu mơ hồ (có ý định du lịch nhưng thiếu địa điểm) → trả về form làm rõ

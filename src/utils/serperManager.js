@@ -95,15 +95,15 @@ class SerperManager {
   /**
    * Tìm kiếm địa điểm trên Google Maps
    * @param {string} query Từ khóa tìm kiếm (e.g., 'Grand World Phú Quốc')
+   * @param {string} [ll] Toạ độ để lấy kết quả LOCAL quanh 1 điểm, dạng '@lat,lng,15z'
+   *                      (Serper places nhận field `ll`) — dùng cho "tìm ... gần tôi".
    * @returns {Object} Dữ liệu địa điểm từ Serper.dev
    */
-  async searchPlaces(query) {
+  async searchPlaces(query, ll) {
     try {
-      return await this._request('https://google.serper.dev/places', {
-        q: query,
-        gl: 'vn',
-        hl: 'vi'
-      });
+      const body = { q: query, gl: 'vn', hl: 'vi' };
+      if (ll) body.ll = ll;
+      return await this._request('https://google.serper.dev/places', body);
     } catch (error) {
       console.error(`❌ Lỗi khi tìm kiếm địa điểm "${query}":`, error.response?.data || error.message);
       throw error;
